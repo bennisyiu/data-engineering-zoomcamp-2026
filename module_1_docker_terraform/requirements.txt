@@ -1,2 +1,7 @@
 pandas
 pyarrow
+pgcli
+jupyter
+sqlalchemy 
+psycopg2-binary
+tqdm

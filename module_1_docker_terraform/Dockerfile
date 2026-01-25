@@ -1,15 +1,15 @@
-# Base image
-FROM python:3.11.9-slim
+FROM python:3.13-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy dependencies file and install
+# Copy requirements file
 COPY requirements.txt .
-RUN pip install -r requirements.txt
 
-# Copy application code
-COPY pipeline.py pipeline.py
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Set entry point
-ENTRYPOINT ["python", "pipeline.py"]
+# Copy ingestion script
+COPY ingest_data.py .
+
+# Set entrypoint
+ENTRYPOINT ["python", "ingest_data.py"]
