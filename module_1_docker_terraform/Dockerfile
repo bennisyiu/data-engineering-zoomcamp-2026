@@ -4,8 +4,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ingest_data.py ingest_green_taxi.py ingest_zones.py ./
+COPY ingest_data.py ./
 
-# Set entrypoint to python, default to ingest_data.py
-ENTRYPOINT ["python"]
-CMD ["ingest_data.py"]
+ENTRYPOINT ["python", "ingest_data.py"]
