@@ -5,14 +5,19 @@ Remarks: I am more familiar with the Windows PowerShell and commands, as well as
 ### Directory setup:
 
 | data-engineering-zoomcamp-2026
-|**| module_1_docker_terraform
-|\_\_**|ny_taxi_postgres_data
-|\_**\_ Dockerfile
-|\_\_** ingest_data.py
-|\_**\_ output_day_10.parquet
-|\_\_** requirements.txt
-|**.gitignore
-|** README.md
+|\_| module_1_docker_terraform
+| |\_| ny_taxi_postgres_data
+| |\_ Dockerfile
+| |\_ homework.sql
+| |\_ ingest_data.py
+| |\_ ingest_green_taxi.py
+| |\_ ingest_zones.py
+| |\_ module1.md
+| |\_ output_day_10.parquet
+| |\_ requirements.txt
+|\_ .gitignore
+|\_ README.md
+|\_\_ requirements.txt
 
 ### Dependencies | requirements.txt
 
@@ -147,6 +152,8 @@ Keep this terminal running.
 
 ---
 
+`docker run -it -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" -e PGADMIN_DEFAULT_PASSWORD="root" -v pgadmin_data:/var/lib/pgadmin -p 8085:80 --network=pg-network --name pgadmin dpage/pgadmin4`
+
 ## Connection Reference
 
 | Component  | From Host Machine | From Container  |
@@ -274,3 +281,25 @@ docker run -it `
 In pgcli or pgAdmin:
 SELECT COUNT(_) FROM yellow_taxi_trips;
 SELECT _ FROM yellow_taxi_trips LIMIT 10;
+
+## Homework
+
+### Prepare the data
+
+create ingest_green_taxi.py with green taxi data URL:
+Inside run() function:
+
+```
+url = 'https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-11.parquet'
+
+# Build connection string
+engine = create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}')
+```
+
+### Default run commands for Yellow Taxi and Green Taxi:
+
+Yellow Taxi:
+`docker run -it --network=pg-network taxi_ingest:v002 ingest_data.py --pg-user=root --pg-pass=root --pg-host=pgdatabase --pg-port=5432 --pg-db=ny_taxi --target-table=yellow_taxi_trips`
+
+Green Taxi:
+`docker run -it --network=pg-network taxi_ingest:v002 ingest_green_taxi.py --pg-user=root --pg-pass=root --pg-host=pgdatabase --pg-port=5432 --pg-db=ny_taxi --target-table=green_taxi_trips`
