@@ -1,15 +1,11 @@
 FROM python:3.13-slim
-
 WORKDIR /app
 
-# Copy requirements file
 COPY requirements.txt .
-
-# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy ingestion script
-COPY ingest_data.py .
+COPY ingest_data.py ingest_green_taxi.py ingest_zones.py ./
 
-# Set entrypoint
-ENTRYPOINT ["python", "ingest_data.py"]
+# Set entrypoint to python, default to ingest_data.py
+ENTRYPOINT ["python"]
+CMD ["ingest_data.py"]
