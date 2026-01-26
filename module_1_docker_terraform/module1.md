@@ -4,20 +4,20 @@ Remarks: I am more familiar with the Windows PowerShell and commands, as well as
 
 ### Directory setup:
 
+```
 | data-engineering-zoomcamp-2026
 |\_| module_1_docker_terraform
-| |\_| ny_taxi_postgres_data
-| |\_ Dockerfile
-| |\_ homework.sql
-| |\_ ingest_data.py
-| |\_ ingest_green_taxi.py
-| |\_ ingest_zones.py
-| |\_ module1.md
-| |\_ output_day_10.parquet
-| |\_ requirements.txt
-|\_ .gitignore
-|\_ README.md
-|\_\_ requirements.txt
+  |\_| ny_taxi_postgres_data
+  |\_  Dockerfile
+  |\_  docker-compose.yaml
+  |\_  homework.sql
+  |\_  ingest_data.py
+  |\_  module1.md
+  |\_  output_day_10.parquet
+  |\_  requirements.txt
+|\_  .gitignore
+|\_  README.md
+```
 
 ### Dependencies | requirements.txt
 
@@ -29,36 +29,38 @@ jupyter
 sqlalchemy
 psycopg2-binary
 tqdm
-
+click
 ```
 
 ---
 
-## Initial Docker Commands
+## Docker Basics
+
+### Initial Docker Commands
 
 1. When Dockerfile is ready, build image:
 
-docker build -t test:pandas .
+`docker build -t test:pandas .`
 
 2. Run PostgreSQL (basic, no network):
 
 ```
 docker run -it `
-    -e POSTGRES_USER="root"`
+    -e POSTGRES_USER="root" `
     -e POSTGRES_PASSWORD="root" `
-    -e POSTGRES_DB="ny_taxi"`
+    -e POSTGRES_DB="ny_taxi" `
     -v C:\Users\Bennis\OneDrive\Personal_OneDrive\Coding\data-engineering-zoomcamp-2026\module_1_docker_terraform\ny_taxi_postgres_data:/var/lib/postgresql/data `
-    -p 5432:5432`
+    -p 5432:5432 `
     postgres:13
-
 ```
 
 3. Connect with pgcli (in new terminal):
 
-pgcli -h localhost -p 5432 -u root -d ny_taxi
+`pgcli -h localhost -p 5432 -u root -d ny_taxi`
 
 4. Basic SQL commands:
 
+```
 -- List tables
 \dt
 
@@ -69,26 +71,10 @@ CREATE TABLE test (id INTEGER, name VARCHAR(50));
 INSERT INTO test VALUES (1, 'Hello Docker');
 
 -- Query data
-SELECT \* FROM test;
+SELECT * FROM test;
 
 -- Exit
 \q
-
-5. Convert Jupyter notebook to Python script:
-
-jupyter nbconvert --to script notebook.ipynb
-mv notebook.py ingest_data.py
-
-6. Run data ingestion script:
-
-```
-python ingest_data.py `
-    --pg-user=root`
-    --pg-pass=root `
-    --pg-host=localhost`
-    --pg-port=5432 `
-    --pg-db=ny_taxi`
-    --target-table=yellow_taxi_trips
 ```
 
 ---
@@ -108,13 +94,13 @@ Stop any existing container first, then:
 
 ```
 docker run -it `
-    -e POSTGRES_USER="root"`
+    -e POSTGRES_USER="root" `
     -e POSTGRES_PASSWORD="root" `
-    -e POSTGRES_DB="ny_taxi"`
+    -e POSTGRES_DB="ny_taxi" `
     -v ny_taxi_postgres_data:/var/lib/postgresql/data `
-    -p 5432:5432`
+    -p 5432:5432 `
     --network=pg-network `
-    --name pgdatabase`
+    --name pgdatabase `
     postgres:13
 ```
 
@@ -126,11 +112,11 @@ Open new terminal:
 
 ```
 docker run -it `
-    -e PGADMIN_DEFAULT_EMAIL="admin@admin.com"`
+    -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" `
     -e PGADMIN_DEFAULT_PASSWORD="root" `
-    -v pgadmin_data:/var/lib/pgadmin`
+    -v pgadmin_data:/var/lib/pgadmin `
     -p 8085:80 `
-    --network=pg-network`
+    --network=pg-network `
     --name pgadmin `
     dpage/pgadmin4
 ```
@@ -152,8 +138,6 @@ Keep this terminal running.
 
 ---
 
-`docker run -it -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" -e PGADMIN_DEFAULT_PASSWORD="root" -v pgadmin_data:/var/lib/pgadmin -p 8085:80 --network=pg-network --name pgadmin dpage/pgadmin4`
-
 ## Connection Reference
 
 | Component  | From Host Machine | From Container  |
@@ -165,11 +149,111 @@ Key: Use localhost from host machine (Python, pgcli). Use container name from co
 
 ---
 
+## Dockerized Ingestion Pipeline
+
+### Final Dockerfile (v003)
+
+```
+FROM python:3.13-slim
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY ingest_data.py ./
+
+ENTRYPOINT ["python", "ingest_data.py"]
+```
+
+### Build the Docker Image
+
+`cd module_1_docker_terraform`
+`docker build -t taxi_ingest:v003 .`
+
+### Run Ingestion with Dataset Selection
+
+Load all datasets (yellow taxi, green taxi, zones):
+
+`docker run -it --network=pg-network taxi_ingest:v003 --pg-user=root --pg-pass=root --pg-host=pgdatabase --pg-port=5432 --pg-db=ny_taxi --dataset=all`
+
+Load individual datasets:
+
+```
+--dataset=yellow  # Yellow taxi only
+--dataset=green   # Green taxi only
+--dataset=zones   # Zones only
+```
+
+---
+
+## Docker Compose Setup
+
+### docker-compose.yaml
+
+```
+services:
+  pgdatabase:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "ny_taxi"
+    volumes:
+      - "ny_taxi_postgres_data:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "root"
+    volumes:
+      - "pgadmin_data:/var/lib/pgadmin"
+    ports:
+      - "8085:80"
+
+volumes:
+  ny_taxi_postgres_data:
+  pgadmin_data:
+```
+
+### Docker Compose Commands
+
+# Start services in background
+
+`docker-compose up -d`
+
+# View running services
+
+`docker-compose ps`
+
+# View logs
+
+`docker-compose logs`
+`docker-compose logs -f` # Follow logs
+
+# Stop services
+
+`docker-compose down`
+
+# Stop and remove volumes
+
+`docker-compose down -v`
+
+### Run Ingestion with Docker Compose Network
+
+`docker run -it --network=module_1_docker_terraform_default taxi_ingest:v003 --pg-user=root --pg-pass=root --pg-host=pgdatabase --pg-port=5432 --pg-db=ny_taxi --dataset=all`
+
+---
+
 ## Managing Docker Resources
 
 ### Stop Containers
 
-Press Ctrl+C in running terminals
+Press Ctrl+C in running terminals, or:
+
+`docker stop pgdatabase pgadmin`
 
 ### Remove Containers
 
@@ -177,8 +261,7 @@ Press Ctrl+C in running terminals
 `docker rm pgadmin`
 
 Force remove:
-`docker rm -f pgdatabase`
-`docker rm -f pgadmin`
+`docker rm -f pgdatabase pgadmin`
 
 ### Remove Network
 
@@ -186,15 +269,36 @@ Force remove:
 
 ### List Resources
 
-`docker ps` # Running containers
-`docker ps -a` # All containers
-`docker volume ls` # Volumes
-`docker network ls` # Networks
+```
+docker ps              # Running containers
+docker ps -a           # All containers
+docker volume ls       # Volumes
+docker network ls      # Networks
+docker images          # Images
+```
 
 ### Remove Volumes (deletes data!)
 
 `docker volume rm ny_taxi_postgres_data`
 `docker volume rm pgadmin_data`
+
+### Clean Up Unused Resources
+
+# Remove stopped containers
+
+`docker container prune`
+
+# Remove unused images
+
+`docker image prune -a`
+
+# Remove unused volumes
+
+`docker volume prune`
+
+# Remove everything unused
+
+`docker system prune -a`
 
 ---
 
@@ -204,102 +308,64 @@ Force remove:
 
 If port already in use, change host port:
 
-`-p 5433:5432 # PostgreSQL`
-`-p 8086:80 # pgAdmin`
+```
+-p 5433:5432  # PostgreSQL
+-p 8086:80    # pgAdmin
+```
 
 ### Container Name Conflict
 
-`docker rm -f pgdatabase`
-`docker rm -f pgadmin`
+```
+docker rm -f pgdatabase
+docker rm -f pgadmin
+```
 
 ### Network Connection Issues
 
 Verify containers on same network:
 
-`docker inspect pgdatabase | Select-String "pg-network"`
-`docker inspect pgadmin | Select-String "pg-network"`
+```
+docker inspect pgdatabase | Select-String "pg-network"
+docker inspect pgadmin | Select-String "pg-network"
+```
+
+### pgAdmin Connection Lost
+
+Check container status:
+
+`docker ps`
+
+Restart container:
+`docker start pgadmin`
+
+Hard refresh browser: Ctrl + Shift + R
 
 ---
 
-## Dockerizing the Ingestion Script
+## Key Concepts
 
-### Create Dockerfile
+### Images vs Containers
 
-Create a file named `Dockerfile` in your project directory:
+- Image: Template/blueprint (like a class)
+- Container: Running instance (like an object)
+- Multiple containers can run from one image
 
-```
-FROM python:3.13-slim
-WORKDIR /app
+### Volumes
 
-# Copy requirements file
+- Persist data outside containers
+- Survive container deletion
+- Named volumes vs bind mounts
 
-COPY requirements.txt .
+### Networks
 
-# Install dependencies
+- Allow container-to-container communication
+- Use service/container names as hostnames
+- Docker Compose creates default network automatically
 
-RUN pip install --no-cache-dir -r requirements.txt
+### Docker Compose Benefits
 
-# Copy ingestion script
-
-COPY ingest_data.py .
-
-# Set entrypoint
-
-ENTRYPOINT ["python", "ingest_data.py"]
-```
-
-### Build the Docker Image
-
-Navigate to your project directory (where Dockerfile and ingest_data.py are):
-`cd module_1_docker_terraform`
-`docker build -t taxi_ingest:v001 .`
-
-### Run the Containerized Ingestion
-
-Run the container on the same network as PostgreSQL:
-
-```
-docker run -it `
-    --network=pg-network taxi_ingest:v001 `
-    --pg-user=root `
-    --pg-pass=root `
-    --pg-host=pgdatabase `
-    --pg-port=5432 `
-    --pg-db=ny_taxi `
-    --target-table=yellow_taxi_trips`
-```
-
-### Important Notes
-
-- Network: Provide --network=pg-network so container can find PostgreSQL
-- Host: Use pgdatabase (container name) not localhost since running in container
-- Table drop: Script will replace pre-existing table automatically
-- One-time run: Container runs once and exits when ingestion completes
-
-### Verify Data
-
-In pgcli or pgAdmin:
-SELECT COUNT(_) FROM yellow_taxi_trips;
-SELECT _ FROM yellow_taxi_trips LIMIT 10;
-
-## Homework
-
-### Prepare the data
-
-create ingest_green_taxi.py with green taxi data URL:
-Inside run() function:
-
-```
-url = 'https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-11.parquet'
-
-# Build connection string
-engine = create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}')
-```
-
-### Default run commands for Yellow Taxi and Green Taxi:
-
-Yellow Taxi:
-`docker run -it --network=pg-network taxi_ingest:v002 ingest_data.py --pg-user=root --pg-pass=root --pg-host=pgdatabase --pg-port=5432 --pg-db=ny_taxi --target-table=yellow_taxi_trips`
-
-Green Taxi:
-`docker run -it --network=pg-network taxi_ingest:v002 ingest_green_taxi.py --pg-user=root --pg-pass=root --pg-host=pgdatabase --pg-port=5432 --pg-db=ny_taxi --target-table=green_taxi_trips`
+- Single file defines entire stack
+- Service names automatically resolve for networking
+- One command starts/stops everything
+- Version control friendly
+- Repeatable deployments
