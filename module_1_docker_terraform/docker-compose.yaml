@@ -1,6 +1,6 @@
 services:
   pgdatabase:
-    image: postgres:13    # Changed from postgres:18
+    image: postgres:18
     environment:
       POSTGRES_USER: "root"
       POSTGRES_PASSWORD: "root"
@@ -9,7 +9,7 @@ services:
       - "ny_taxi_postgres_data:/var/lib/postgresql"
     ports:
       - "5432:5432"
-  
+
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -19,6 +19,8 @@ services:
       - "pgadmin_data:/var/lib/pgadmin"
     ports:
       - "8085:80"
+
+
 
 volumes:
   ny_taxi_postgres_data:
