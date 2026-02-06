@@ -83,6 +83,11 @@ services:
             tmpDir:
               path: /tmp/kestra-wd/tmp
           url: http://localhost:8080/
+          ai:
+            type: "gemini"
+            gemini:
+              api-key: "AIzaSyB7gxgpdU8-n10sYjMtWxpCSUZ4Si-zS8E"
+              model-name: gemini-2.0-flash
     ports:
       - "8080:8080"
       - "8081:8081"
