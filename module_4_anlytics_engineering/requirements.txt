@@ -1,0 +1,5 @@
+dbt-core
+dbt-bigquery
+google-cloud-bigquery
+requests
+pyarrow

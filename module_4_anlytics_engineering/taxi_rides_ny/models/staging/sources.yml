@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: "Raw data from the NYC Taxi dataset"
+    database: inlaid-rig-385510 # my GCP project id
+    schema: zoomcamp # dataset name
+    tables:
+      - name: yellow_tripdata # my table name
+      - name: green_tripdata # my table name  
