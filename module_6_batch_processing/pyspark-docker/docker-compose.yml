@@ -1,0 +1,13 @@
+# Version: v2.0 - PySpark Docker Compose (updated for homework)
+services:
+  pyspark:
+    build: .
+    container_name: pyspark-dev
+    volumes:
+      - ./app:/opt/spark/work-dir
+      - ./data:/opt/spark/data # Mount data directory for datasets
+    ports:
+      - "4040:4040" # Spark UI
+    stdin_open: true
+    tty: true
+    command: /bin/bash
