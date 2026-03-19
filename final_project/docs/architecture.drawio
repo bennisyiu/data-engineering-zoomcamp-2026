@@ -1,0 +1,401 @@
+<mxfile host="app.diagrams.net" modified="2026-03-12T00:00:00.000Z" agent="draw.io" version="24.0.0" type="device">
+  <diagram id="architecture" name="High-Level Architecture">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== LOCAL DEVELOPMENT GROUP ===== -->
+        <mxCell id="local_group" value="Local Development" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=1;fontSize=14;arcSize=8;dashed=1;dashPattern=8 4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="360" height="380" as="geometry" />
+        </mxCell>
+
+        <mxCell id="csv_files" value="&lt;b&gt;CSV Files&lt;/b&gt;&lt;br&gt;policy.csv&lt;br&gt;invoice.csv&lt;br&gt;claim.csv" style="shape=document;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="80" y="90" width="120" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sql_files" value="&lt;b&gt;SQL Queries&lt;/b&gt;&lt;br&gt;(.sql files)" style="shape=note;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;size=14;" vertex="1" parent="1">
+          <mxGeometry x="240" y="90" width="120" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dbt_dev" value="&lt;b&gt;dbt Core&lt;/b&gt;&lt;br&gt;Develop &amp; test&lt;br&gt;models locally" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="120" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tableau_desktop" value="&lt;b&gt;Tableau Desktop&lt;/b&gt;&lt;br&gt;Build dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="240" y="200" width="120" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pgadmin" value="&lt;b&gt;PgAdmin&lt;/b&gt;&lt;br&gt;Data exploration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="160" y="310" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===== AWS CLOUD GROUP ===== -->
+        <mxCell id="aws_group" value="AWS Cloud" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1;fontSize=14;arcSize=6;dashed=1;dashPattern=8 4;" vertex="1" parent="1">
+          <mxGeometry x="480" y="40" width="520" height="530" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s3_bucket" value="&lt;b&gt;Amazon S3&lt;/b&gt;&lt;br&gt;Data Lake&lt;br&gt;&lt;br&gt;raw/policy.csv&lt;br&gt;raw/invoice.csv&lt;br&gt;raw/claim.csv" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;size=12;" vertex="1" parent="1">
+          <mxGeometry x="520" y="90" width="150" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- EC2 Docker Compose group -->
+        <mxCell id="ec2_group" value="EC2 Instance (t3.micro) — Docker Compose" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;verticalAlign=top;fontStyle=1;fontSize=12;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="510" y="250" width="460" height="290" as="geometry" />
+        </mxCell>
+
+        <mxCell id="postgres" value="&lt;b&gt;PostgreSQL 15&lt;/b&gt;&lt;br&gt;Data Warehouse&lt;br&gt;&lt;hr&gt;&lt;font style=&quot;font-size:10px&quot;&gt;raw schema (Bronze)&lt;br&gt;staging schema (Silver)&lt;br&gt;intermediate schema (Silver)&lt;br&gt;marts schema (Gold)&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;size=12;" vertex="1" parent="1">
+          <mxGeometry x="540" y="300" width="170" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="airflow" value="&lt;b&gt;Apache Airflow 2.x&lt;/b&gt;&lt;br&gt;+ astronomer-cosmos&lt;br&gt;&lt;hr&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Orchestration&lt;br&gt;Scheduling&lt;br&gt;Web UI (:8080)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="540" y="470" width="170" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dbt_prod" value="&lt;b&gt;dbt Core&lt;/b&gt;&lt;br&gt;Transformations&lt;br&gt;&lt;hr&gt;&lt;font style=&quot;font-size:10px&quot;&gt;staging → intermediate → marts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="760" y="300" width="180" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ===== REVIEWER ACCESS GROUP ===== -->
+        <mxCell id="output_group" value="Reviewer Access Points" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;fontStyle=1;fontSize=14;arcSize=8;dashed=1;dashPattern=8 4;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="40" width="280" height="380" as="geometry" />
+        </mxCell>
+
+        <mxCell id="airflow_ui" value="&lt;b&gt;Airflow Web UI&lt;/b&gt;&lt;br&gt;EC2:8080&lt;br&gt;DAGs, logs, history" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="90" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tableau_pub" value="&lt;b&gt;Tableau Public&lt;/b&gt;&lt;br&gt;Dashboard (public URL)&lt;br&gt;No login required" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="170" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="github_repo" value="&lt;b&gt;GitHub Private Repo&lt;/b&gt;&lt;br&gt;All code, SQL, dbt,&lt;br&gt;docs, IaC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="250" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dbt_docs" value="&lt;b&gt;dbt Docs&lt;/b&gt;&lt;br&gt;Model lineage&lt;br&gt;EC2:8081" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="330" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===== ARROWS / DATA FLOW ===== -->
+        <!-- CSV → S3 (Extract) -->
+        <mxCell id="arrow1" value="Extract&lt;br&gt;(Python/boto3)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=10;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" source="csv_files" target="s3_bucket" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- S3 → PostgreSQL (Load) -->
+        <mxCell id="arrow2" value="Load&lt;br&gt;(Python)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=12;strokeWidth=2;fontSize=10;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" source="s3_bucket" target="postgres" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PostgreSQL ↔ dbt (Transform) -->
+        <mxCell id="arrow3" value="Transform&lt;br&gt;(dbt run)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=10;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" source="postgres" target="dbt_prod" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- dbt → PostgreSQL (write back) -->
+        <mxCell id="arrow3b" value="Write to&lt;br&gt;marts schema" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;strokeWidth=1;fontSize=9;dashed=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" source="dbt_prod" target="postgres" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Airflow → dbt (orchestrates) -->
+        <mxCell id="arrow4" value="Orchestrates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;fontSize=10;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" source="airflow" target="dbt_prod" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PostgreSQL → Tableau Desktop (connect) -->
+        <mxCell id="arrow5" value="PG connector" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;fontSize=9;dashed=1;fillColor=#e1d5e7;strokeColor=#9673a6;" edge="1" source="postgres" target="tableau_desktop" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Tableau Desktop → Tableau Public -->
+        <mxCell id="arrow6" value="Publish" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=10;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" edge="1" source="tableau_desktop" target="tableau_pub" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Airflow → Airflow UI -->
+        <mxCell id="arrow7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" source="airflow" target="airflow_ui" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- dbt dev → dbt prod (deploy) -->
+        <mxCell id="arrow8" value="Deploy" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;strokeWidth=1;fontSize=9;dashed=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" source="dbt_dev" target="dbt_prod" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- SQL files → GitHub -->
+        <mxCell id="arrow9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;strokeColor=#666666;" edge="1" source="sql_files" target="github_repo" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- dbt prod → dbt docs -->
+        <mxCell id="arrow10" value="dbt docs&lt;br&gt;generate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=1;fontSize=9;dashed=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" source="dbt_prod" target="dbt_docs" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PgAdmin → PostgreSQL -->
+        <mxCell id="arrow11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.85;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;strokeColor=#b85450;" edge="1" source="pgadmin" target="postgres" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="elt_pipeline" name="ELT Pipeline (Airflow DAG)">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="dag_title" value="&lt;font style=&quot;font-size:16px&quot;&gt;&lt;b&gt;Airflow DAG: insurance_elt_pipeline&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="340" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Extract & Load Task Group -->
+        <mxCell id="el_group" value="Task Group: Extract &amp; Load" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1;fontSize=12;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="300" height="280" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_upload" value="&lt;b&gt;upload_csvs_to_s3&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;PythonOperator&lt;br&gt;boto3 upload&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="110" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_load_policy" value="&lt;b&gt;load_policy_to_raw&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;PythonOperator&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="190" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_load_invoice" value="&lt;b&gt;load_invoice_to_raw&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;PythonOperator&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="245" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_load_claim" value="&lt;b&gt;load_claim_to_raw&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;PythonOperator&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="300" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Transform Task Group (Cosmos) -->
+        <mxCell id="transform_group" value="Task Group: Transform (astronomer-cosmos)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontStyle=1;fontSize=12;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="400" y="70" width="660" height="380" as="geometry" />
+        </mxCell>
+
+        <!-- Staging -->
+        <mxCell id="t_stg_policy" value="stg_policy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="110" width="100" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="t_stg_invoice" value="stg_invoice" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="160" width="100" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="t_stg_claim" value="stg_claim" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="210" width="100" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Intermediate -->
+        <mxCell id="t_int_user" value="int_user_policies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="100" width="120" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="t_int_prem" value="int_policy_premiums" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="155" width="120" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="t_int_claims" value="int_policy_claims" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="210" width="120" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Marts -->
+        <mxCell id="t_dim" value="dim_policy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="90" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="t_fct_prem" value="fct_premium_received" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="135" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="t_fct_claims" value="fct_claims" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="180" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="t_mart_nvr" value="mart_new_vs_returning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="225" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="t_mart_dash" value="mart_dashboard_summary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="270" width="130" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Validate Task Group -->
+        <mxCell id="validate_group" value="Task Group: Validate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;fontStyle=1;fontSize=12;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="400" y="480" width="300" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_dbt_test" value="&lt;b&gt;dbt test&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;BashOperator&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="520" width="110" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_dbt_docs" value="&lt;b&gt;dbt docs generate&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;BashOperator&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="520" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- DAG Arrows -->
+        <mxCell id="da1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=1.5;" edge="1" source="t_upload" target="t_load_policy" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da1b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=1.5;" edge="1" source="t_upload" target="t_load_invoice" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da1c" style="edgeStyle=orthogonalEdgeStyle;rounded=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=1.5;" edge="1" source="t_upload" target="t_load_claim" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="da2a" style="edgeStyle=orthogonalEdgeStyle;rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1.5;" edge="1" source="t_load_policy" target="t_stg_policy" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da2b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1.5;" edge="1" source="t_load_invoice" target="t_stg_invoice" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da2c" style="edgeStyle=orthogonalEdgeStyle;rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1.5;" edge="1" source="t_load_claim" target="t_stg_claim" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="da3a" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="t_stg_policy" target="t_int_user" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da3b" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeWidth=1;" edge="1" source="t_stg_policy" target="t_int_prem" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da3c" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.75;strokeWidth=1;" edge="1" source="t_stg_invoice" target="t_int_prem" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da3d" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeWidth=1;" edge="1" source="t_stg_policy" target="t_int_claims" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da3e" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.75;strokeWidth=1;" edge="1" source="t_stg_claim" target="t_int_claims" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="da4a" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="t_int_user" target="t_mart_nvr" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da4b" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="t_int_prem" target="t_fct_prem" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da4c" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="t_int_prem" target="t_mart_nvr" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da4d" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="t_int_claims" target="t_fct_claims" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da4e" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="t_fct_prem" target="t_mart_dash" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da4f" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="t_fct_claims" target="t_mart_dash" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="da5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=1.5;" edge="1" source="t_mart_dash" target="t_dbt_test" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="da6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1.5;" edge="1" source="t_dbt_test" target="t_dbt_docs" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend_title" value="&lt;b&gt;Legend&lt;/b&gt;" style="text;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="930" y="370" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="Staging (Silver)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="395" width="100" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="Intermediate (Silver)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="425" width="100" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="Marts (Gold)" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="455" width="100" height="25" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="data_model" name="Data Model Lineage">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="dm_title" value="&lt;font style=&quot;font-size:16px&quot;&gt;&lt;b&gt;Data Model Lineage — Medallion Architecture&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="420" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Bronze / Sources -->
+        <mxCell id="bronze_group" value="&lt;b&gt;BRONZE&lt;/b&gt;&lt;br&gt;S3 + raw schema" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontSize=12;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="170" height="260" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_raw_policy" value="&lt;b&gt;policy.csv&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;id, policy_number,&lt;br&gt;user_id, product,&lt;br&gt;issue_date, gender, dob&lt;/font&gt;" style="shape=document;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;size=10;" vertex="1" parent="1">
+          <mxGeometry x="55" y="110" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_raw_invoice" value="&lt;b&gt;invoice.csv&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;id, policy_number,&lt;br&gt;status, pre_levy_amount,&lt;br&gt;total_amount, charge_date&lt;/font&gt;" style="shape=document;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;size=10;" vertex="1" parent="1">
+          <mxGeometry x="55" y="185" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_raw_claim" value="&lt;b&gt;claim.csv&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;id, policy_number,&lt;br&gt;status, total_billed,&lt;br&gt;total_base_payable&lt;/font&gt;" style="shape=document;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;size=10;" vertex="1" parent="1">
+          <mxGeometry x="55" y="260" width="140" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Silver / Staging -->
+        <mxCell id="silver_stg_group" value="&lt;b&gt;SILVER — Staging&lt;/b&gt;&lt;br&gt;staging schema" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontSize=12;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="280" y="70" width="150" height="260" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_stg_policy" value="&lt;b&gt;stg_policy&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;cleaned, typed,&lt;br&gt;renamed columns&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="295" y="115" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_stg_invoice" value="&lt;b&gt;stg_invoice&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;cleaned, typed,&lt;br&gt;renamed columns&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="295" y="190" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_stg_claim" value="&lt;b&gt;stg_claim&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;cleaned, typed,&lt;br&gt;renamed columns&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="295" y="265" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- Silver / Intermediate -->
+        <mxCell id="silver_int_group" value="&lt;b&gt;SILVER — Intermediate&lt;/b&gt;&lt;br&gt;intermediate schema" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontSize=12;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="500" y="70" width="180" height="260" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_int_user" value="&lt;b&gt;int_user_policies&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;policy sequence per user&lt;br&gt;new vs returning flag&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="515" y="110" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_int_prem" value="&lt;b&gt;int_policy_premiums&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;policy + aggregated&lt;br&gt;invoice amounts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="515" y="185" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_int_claims" value="&lt;b&gt;int_policy_claims&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;policy + aggregated&lt;br&gt;claim amounts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="515" y="260" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Gold / Marts -->
+        <mxCell id="gold_group" value="&lt;b&gt;GOLD — Marts&lt;/b&gt;&lt;br&gt;marts schema" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;fontSize=12;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="750" y="40" width="200" height="340" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_dim" value="&lt;b&gt;dim_policy&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Denormalized policy&lt;br&gt;dimension (Q1b)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="775" y="80" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_fct_prem" value="&lt;b&gt;fct_premium_received&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Premium metrics&lt;br&gt;by period (Q3)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="775" y="140" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_fct_claims" value="&lt;b&gt;fct_claims&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Claims with loss&lt;br&gt;amounts (Q3)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="775" y="200" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_mart_nvr" value="&lt;b&gt;mart_new_vs_returning&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Avg premium comparison&lt;br&gt;new vs returning (Q1a)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="775" y="260" width="150" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dm_mart_dash" value="&lt;b&gt;mart_dashboard_summary&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Dashboard-ready metrics&lt;br&gt;for Tableau (Q3)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="775" y="320" width="150" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- Tableau output -->
+        <mxCell id="dm_tableau" value="&lt;b&gt;Tableau Public&lt;/b&gt;&lt;br&gt;Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="200" width="130" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows: Bronze → Silver Staging -->
+        <mxCell id="dm_a1" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1.5;" edge="1" source="dm_raw_policy" target="dm_stg_policy" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a2" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1.5;" edge="1" source="dm_raw_invoice" target="dm_stg_invoice" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a3" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1.5;" edge="1" source="dm_raw_claim" target="dm_stg_claim" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- Arrows: Staging → Intermediate -->
+        <mxCell id="dm_a4" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="dm_stg_policy" target="dm_int_user" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a5" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeWidth=1;" edge="1" source="dm_stg_policy" target="dm_int_prem" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a6" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.75;strokeWidth=1;" edge="1" source="dm_stg_invoice" target="dm_int_prem" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a7" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeWidth=1;" edge="1" source="dm_stg_policy" target="dm_int_claims" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a8" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.75;strokeWidth=1;" edge="1" source="dm_stg_claim" target="dm_int_claims" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- Arrows: Staging → Marts (dim_policy) -->
+        <mxCell id="dm_a9" style="rounded=1;exitX=1;exitY=0;entryX=0;entryY=0.5;strokeWidth=1;dashed=1;" edge="1" source="dm_stg_policy" target="dm_dim" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a10" style="rounded=1;exitX=1;exitY=0;entryX=0;entryY=0.5;strokeWidth=1;dashed=1;" edge="1" source="dm_stg_invoice" target="dm_dim" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a11" style="rounded=1;exitX=1;exitY=0;entryX=0;entryY=0.5;strokeWidth=1;dashed=1;" edge="1" source="dm_stg_claim" target="dm_dim" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- Arrows: Intermediate → Marts -->
+        <mxCell id="dm_a12" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="dm_int_prem" target="dm_fct_prem" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a13" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=1;" edge="1" source="dm_int_claims" target="dm_fct_claims" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a14" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeWidth=1;" edge="1" source="dm_int_user" target="dm_mart_nvr" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a15" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.75;strokeWidth=1;" edge="1" source="dm_int_prem" target="dm_mart_nvr" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a16" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeWidth=1;" edge="1" source="dm_fct_prem" target="dm_mart_dash" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a17" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.75;strokeWidth=1;" edge="1" source="dm_fct_claims" target="dm_mart_dash" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- Marts → Tableau -->
+        <mxCell id="dm_a18" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeWidth=2;strokeColor=#9673a6;" edge="1" source="dm_mart_dash" target="dm_tableau" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="dm_a19" style="rounded=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeWidth=1;dashed=1;strokeColor=#9673a6;" edge="1" source="dm_dim" target="dm_tableau" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

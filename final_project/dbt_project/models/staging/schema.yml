@@ -1,0 +1,43 @@
+# Staging models: cleaned, typed, filtered. One-to-one or filtered from raw.
+version: 2
+models:
+  - name: stg_policy
+    description: Policies with proper types and an is_outlier_user flag (users with >200 policies).
+    columns:
+      - name: policy_number
+        description: Unique policy identifier.
+        tests: [unique, not_null]
+      - name: user_id
+        tests: [not_null]
+      - name: effective_date
+        tests: [not_null]
+
+  - name: stg_invoice
+    description: Invoices with numeric amounts and dates; excludes orphan records (no matching policy).
+    columns:
+      - name: id
+        description: Unique invoice identifier.
+        tests: [unique, not_null]
+      - name: policy_number
+        description: Links to stg_policy.
+        tests: [not_null]
+      - name: pre_levy_amount
+        description: Net premium before IA levy (0.1%).
+      - name: total_amount
+        description: Total payable (pre_levy + levy).
+      - name: status
+        description: paid, open, void, free, refunded.
+
+  - name: stg_claim
+    description: Claims with numeric amounts and proper date types.
+    columns:
+      - name: id
+        description: Unique claim identifier.
+        tests: [unique, not_null]
+      - name: policy_number
+        description: Links to stg_policy.
+        tests: [not_null]
+      - name: total_billed_amount
+        description: Amount billed by provider.
+      - name: total_base_payable_amount
+        description: Amount payable under the policy.

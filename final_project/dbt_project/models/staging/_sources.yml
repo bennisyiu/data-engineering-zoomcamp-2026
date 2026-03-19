@@ -1,0 +1,15 @@
+# Raw layer: tables loaded as-is from CSV (Bronze)
+# Used by staging models only.
+version: 2
+sources:
+  - name: raw
+    description: Raw CSV data loaded into PostgreSQL (Bronze layer)
+    schema: raw
+    database: "{{ target.dbname }}"
+    tables:
+      - name: raw_policy
+        description: "Insurance policies; one row per policy. Key: policy_number."
+      - name: raw_invoice
+        description: "Billing invoices linked to policies (premiums, IA levy). Key: id."
+      - name: raw_claim
+        description: "Reimbursement claims filed against policies. Key: id."

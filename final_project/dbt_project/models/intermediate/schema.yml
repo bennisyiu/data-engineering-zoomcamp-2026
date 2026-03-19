@@ -1,0 +1,24 @@
+# Intermediate layer: business logic, filters, and keys for marts.
+version: 2
+models:
+  - name: int_policy_ranked
+    description: One row per policy with policy_rank per user (1 = first by effective_date) and is_new_policy flag for Q1 new vs returning.
+    columns:
+      - name: policy_number
+        tests: [unique, not_null]
+      - name: user_id
+        tests: [not_null]
+      - name: policy_rank
+        description: 1 = user's first policy (new), 2+ = returning.
+      - name: is_new_policy
+        description: True when policy_rank = 1.
+
+  - name: int_invoice_paid
+    description: Invoices with status = 'paid' only; used for premium received and Q1 average net premium.
+    columns:
+      - name: id
+        tests: [unique, not_null]
+      - name: policy_number
+        tests: [not_null]
+      - name: pre_levy_amount
+        description: Net premium before IA levy (metric for Q1).

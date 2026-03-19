@@ -1,0 +1,17 @@
+# Copy to profiles.yml and set env vars (or fill in for local use).
+# For Docker: POSTGRES_HOST=host.docker.internal and other POSTGRES_* set in docker-compose.
+config:
+  send_anonymous_usage_stats: false
+
+dbt_project:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'localhost') }}"
+      port: "{{ env_var('POSTGRES_PORT', '5432') | as_number }}"
+      user: "{{ env_var('POSTGRES_USER') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'insurance_dwh') }}"
+      schema: staging
+      threads: 4
