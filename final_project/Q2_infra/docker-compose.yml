@@ -1,0 +1,108 @@
+# Airflow + warehouse Postgres. Run from Q2_infra/: docker compose up -d
+# Airflow UI: :8082 (admin/admin). insurance_dwh: set POSTGRES_* in root .env.
+# EC2 / all-Docker: POSTGRES_HOST=warehouse. Local host Postgres: POSTGRES_HOST=host.docker.internal
+
+x-common-env: &common-env
+  AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+  AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+  AIRFLOW__WEBSERVER__SECRET_KEY: "insurance-dwh-airflow-secret-key-change-in-production"
+  POSTGRES_HOST: ${POSTGRES_HOST:-warehouse}
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_DB: ${POSTGRES_DB:-insurance_dwh}
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_airflow_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # insurance_dwh (dbt + extract_load). Use POSTGRES_HOST=warehouse on EC2.
+  # Port 5432 exposed for Tableau / pgAdmin from your laptop (open 5432 in EC2 security group).
+  warehouse:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-insurance_dwh}
+    volumes:
+      - postgres_warehouse_data:/var/lib/postgresql/data
+      - ./scripts/init_warehouse.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  airflow-init:
+    build: .
+    environment:
+      <<: *common-env
+      _PIP_ADDITIONAL_REQUIREMENTS: ""
+    command: >
+      bash -c "
+      airflow db init &&
+      airflow users create --role Admin --username admin --email admin@example.com --firstname admin --lastname user --password admin || true
+      "
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+    depends_on:
+      postgres:
+        condition: service_healthy
+      warehouse:
+        condition: service_healthy
+    restart: "no"
+
+  airflow-webserver:
+    build: .
+    environment:
+      <<: *common-env
+      _PIP_ADDITIONAL_REQUIREMENTS: ""
+    command: webserver
+    ports:
+      - "8082:8080"
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+      - ../scripts:/opt/airflow/repo/scripts
+      - ../data:/opt/airflow/repo/data
+      - ../dbt_project:/opt/airflow/repo/dbt_project
+      - ../.env:/opt/airflow/repo/.env:ro
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      warehouse:
+        condition: service_healthy
+
+  airflow-scheduler:
+    build: .
+    environment:
+      <<: *common-env
+    command: scheduler
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+      - ../scripts:/opt/airflow/repo/scripts
+      - ../data:/opt/airflow/repo/data
+      - ../dbt_project:/opt/airflow/repo/dbt_project
+      - ../.env:/opt/airflow/repo/.env:ro
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      warehouse:
+        condition: service_healthy
+
+volumes:
+  postgres_airflow_data:
+  postgres_warehouse_data:
