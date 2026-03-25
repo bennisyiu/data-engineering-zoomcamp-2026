@@ -12,11 +12,11 @@ The build is ordered local-first, then AWS, so that iteration can be done withou
 |-------|---------|-----------|
 | **Phase 1** | Local PostgreSQL + load data | Data is required before SQL and dbt |
 | **Phase 2** | S3 bucket | Data lake and extract script validation |
-| **Phase 3** | SQL (Q1) | Executed after EDA |
-| **Phase 4** | dbt (Q1 + Q2) | Transformation layer |
-| **Phase 5** | Airflow + Docker (Q2) | Full pipeline run locally |
-| **Phase 6** | Tableau (Q3) | Built after marts are ready |
-| **Phase 7** | EC2 (Bonus) | Deployed only after local is working |
+| **Phase 3** | SQL analytics | Executed after EDA |
+| **Phase 4** | dbt transformations | Transformation layer |
+| **Phase 5** | Airflow + Docker | Full pipeline run locally |
+| **Phase 6** | Tableau dashboard | Built after marts are ready |
+| **Phase 7** | EC2 deployment | Deployed only after local is working |
 
 ---
 
@@ -74,7 +74,7 @@ The extract_load script reads the three CSVs from `data/`, creates tables in `ra
 
 ### 1.6 Explore in PgAdmin
 
-After load, row counts, column types, nulls, `policy_number` relationships, and multi-policy users (for Q1 new vs returning) are reviewed; these findings inform the SQL and dbt design.
+After load, row counts, column types, nulls, `policy_number` relationships, and multi-policy users (for new vs returning analysis) are reviewed; these findings inform the SQL and dbt design.
 
 ---
 
@@ -127,7 +127,7 @@ aws s3api put-public-access-block --bucket <bucket-name> --public-access-block-c
 
 ## Phase 3–6: Development
 
-Phases 3–6 are executed in order: SQL (Q1) after EDA, dbt after SQL, Airflow + Docker after dbt, Tableau after marts.
+Phases 3–6 are executed in order: SQL after EDA, dbt after SQL, Airflow + Docker after dbt, Tableau after marts.
 
 ---
 
@@ -173,7 +173,7 @@ On Amazon Linux 2: Docker is installed via yum, the service is started, the user
 
 ### 7.7 Deploy
 
-The repo is cloned on the instance, `Q2_infra/.env.example` is copied to `.env` and populated, then `cd Q2_infra` and `docker compose up -d` are run.
+The repo is cloned on the instance, `infra/.env.example` is copied to `.env` and populated, then `cd infra` and `docker compose up -d` are run.
 
 ### 7.8 Check
 

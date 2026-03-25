@@ -1,11 +1,11 @@
-# Q2 / Bonus: Airflow + Docker (local) & Cloud
+# Infrastructure: Airflow + Docker (Local) & Cloud
 
 This folder runs the full ELT: **extract_load** (S3 or local `data/` → Postgres `raw`), then **dbt run** and **dbt test**, orchestrated by Airflow.
 
 ## Requirements
 
 - Docker and Docker Compose
-- Root **`.env`** (copy from `Q2_infra/.env.example`; never commit `.env`): `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_HOST` (default **`warehouse`** — the warehouse Postgres service in this compose)
+- Root **`.env`** (copy from `infra/.env.example`; never commit `.env`): `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_HOST` (default **`warehouse`** — the warehouse Postgres service in this compose)
 - **`dbt_project/profiles.yml`** — only for **local** `dbt run` from your laptop. **Airflow on Docker/EC2** does not use it: the DAG uses `profiles.yml.example` and a writable `/tmp` copy (see below).
 - **Data:** either set **`S3_BUCKET_NAME`** (and optional **`S3_RAW_PREFIX`**, default `raw`) in `.env`, or place the three CSVs in **`data/`** (see [S3_SETUP.md](S3_SETUP.md)). **`data/` is gitignored** — on EC2 you almost always use **S3**; without S3 and without CSVs in `data/`, extract_load skips all files and dbt may fail on empty raw tables.
 - On **EC2**, attach an IAM role with S3 read access when using S3 (no access keys in `.env` on the server)
@@ -16,10 +16,10 @@ From repo root:
 
 ```bash
 cd dbt_project && cp profiles.yml.example profiles.yml   # once if needed
-cd ../Q2_infra && docker compose --env-file ../.env up -d
+cd ../infra && docker compose --env-file ../.env up -d
 ```
 
-`.env` lives in the **repo root**; Compose only auto-loads `.env` in `Q2_infra/`, so use **`--env-file ../.env`** (or copy `.env` into `Q2_infra/`). On Linux EC2, if Docker says permission denied on `docker.sock`, run `sudo usermod -aG docker ubuntu`, log out/in, or use `sudo docker compose ...`.
+`.env` lives in the **repo root**; Compose only auto-loads `.env` in `infra/`, so use **`--env-file ../.env`** (or copy `.env` into `infra/`). On Linux EC2, if Docker says permission denied on `docker.sock`, run `sudo usermod -aG docker ubuntu`, log out/in, or use `sudo docker compose ...`.
 
 First run: init creates Airflow metadata and admin user. After ~30–60s: **http://localhost:8082** — `admin` / `admin`. Trigger DAG **`insurance_elt_pipeline`**.
 
@@ -72,7 +72,7 @@ The **warehouse** container exposes **port 5432** on the host so you can connect
 1. **EC2 security group:** Add an **inbound rule**: Type **PostgreSQL**, Port **5432**, Source **My IP** (or **0.0.0.0/0** for testing only).
 2. **Restart the stack** so the port is published (if you just added `ports: 5432` to the compose):
    ```bash
-   cd Q2_infra && sudo docker compose --env-file ../.env up -d
+   cd infra && sudo docker compose --env-file ../.env up -d
    ```
 
 Use the **same credentials as in your root `.env`** on the server:
