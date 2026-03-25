@@ -1,6 +1,6 @@
 # Tableau Dashboard Summary (Personal Reference)
 
-> Gitignored — reference for the Q3 dashboard build.
+> Gitignored — reference for the dashboard build.
 
 ---
 

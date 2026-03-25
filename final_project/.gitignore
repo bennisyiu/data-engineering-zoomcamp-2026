@@ -27,8 +27,8 @@ share/python-wheels/
 MANIFEST
 
 # Data
-data/
-*.csv
+# data/
+# *.csv
 
 # Personal notes (not for submission)
 # notes/

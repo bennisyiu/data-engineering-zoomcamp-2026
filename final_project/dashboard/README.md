@@ -1,4 +1,4 @@
-# Q3: Analytics Dashboard
+# Analytics Dashboard
 
 ## Tableau Public
 
