@@ -1,0 +1,64 @@
+# Marts: analytical models for reporting (Q1 + Q3).
+version: 2
+models:
+  - name: mart_new_vs_returning_premium
+    description: "Q1: Average net premium (pre_levy_amount) for new vs returning policies; excludes outlier user."
+    columns:
+      - name: policy_type
+        description: "new = user's first policy, returning = 2nd+ policy."
+      - name: avg_net_premium
+        description: "Average pre_levy_amount (net premium before IA levy)."
+
+  - name: mart_policy_denormalized
+    description: "Q1: Denormalized table — one row per policy with aggregated invoice and claim metrics."
+    columns:
+      - name: policy_number
+        tests: [unique, not_null]
+      - name: total_pre_levy_amount
+        description: "Sum of paid invoice pre_levy amounts for this policy."
+      - name: total_payable_amount
+        description: "Sum of claim total_base_payable_amount for this policy."
+
+  - name: mart_dashboard_monthly
+    description: "Q3: One row per month — premium received, policies issued, claims paid, claim count, loss ratio, avg premium per policy, avg claim amount (excl. outlier user)."
+    columns:
+      - name: month_start
+      - name: premium_received
+      - name: claim_count
+      - name: loss_ratio
+      - name: avg_premium_per_policy
+      - name: avg_claim_amount
+
+  - name: mart_dashboard_daily
+    description: "Q3: One row per day — same 7 metrics as monthly, for last 7/30 days and trend charts (excl. outlier user)."
+    columns:
+      - name: day_date
+      - name: premium_received
+      - name: policies_issued
+      - name: claims_paid
+      - name: claim_count
+      - name: loss_ratio
+      - name: avg_premium_per_policy
+      - name: avg_claim_amount
+
+  - name: mart_dashboard_rollups
+    description: "Q3: One row per (time_grain, period_start). Grains D, W, M, Q, Y. Same-period-last-year (_ly) columns for M, Q, Y only."
+    columns:
+      - name: time_grain
+        description: "D=day, W=week, M=month, Q=quarter, Y=year."
+      - name: period_start
+      - name: premium_received_ly
+        description: "Same period last year (M/Q/Y only)."
+
+  - name: mart_dashboard_by_product
+    description: "Q3: One row per (month, product) — premium, policies, claims, loss ratio and same-month-last-year (_ly) for product breakdown."
+    columns:
+      - name: month_start
+      - name: product
+      - name: premium_received
+      - name: policies_issued
+      - name: claims_paid
+      - name: claim_count
+      - name: loss_ratio
+      - name: premium_received_ly
+      - name: loss_ratio_ly
