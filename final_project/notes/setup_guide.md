@@ -149,7 +149,7 @@ Permissions are set via `chmod 400` (Linux/Mac) or icacls on Windows. `*.pem` is
 
 ### 7.3 Security group
 
-A security group is created; ingress is added for SSH (restricted IP), 8082 (Airflow UI), and 5432 (PostgreSQL for reviewer access). The host IP is obtained via `curl ifconfig.me`.
+A security group is created; ingress is added for SSH (restricted IP), 8082 (Airflow UI), 8501 (Streamlit Text-to-SQL), and 5432 (PostgreSQL for reviewer access). The host IP is obtained via `curl ifconfig.me`.
 
 ### 7.4 Launch instance
 
