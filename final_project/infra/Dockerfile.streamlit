@@ -1,0 +1,17 @@
+# Text-to-SQL UI; connects to warehouse service on the Compose network
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY streamlit-requirements.txt /app/
+RUN pip install --no-cache-dir -r streamlit-requirements.txt
+
+# streamlit_app/ and .env are bind-mounted at runtime (see docker-compose.yml)
+CMD ["streamlit", "run", "streamlit_app/app.py", \
+     "--server.address=0.0.0.0", \
+     "--server.port=8501", \
+     "--server.headless=true"]

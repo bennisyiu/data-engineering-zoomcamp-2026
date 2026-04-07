@@ -1,51 +1,48 @@
 # Data Engineering Zoomcamp 2026
 
-## This is the repository of my homework, there are a dedicated .md and requirements.txt file for each module.
+Coursework and capstone for [Data Engineering Zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp): homework by module, plus a completed **final project** (insurance analytics ELT on AWS).
 
-Remarks: I am more familiar with the Windows PowerShell, therefore, I am using the usual Python VENV with pip instead of `uv`.
+## Final project (capstone)
 
-## The curriculum covers the following modules:
+**[Insurance Policy Analytics](final_project/README.md)** — End-to-end **ELT**: Python extract/load (S3 → PostgreSQL), **dbt** (medallion: raw → staging → intermediate → marts), **Apache Airflow** orchestration, **AWS EC2 + S3**, and a **Tableau Public** dashboard.
 
-### Module 1 - Docker & Terraform
+Reviewers: start at [`final_project/README.md`](final_project/README.md) for access (Airflow UI, warehouse connection, live dashboard, architecture diagrams, and infra notes).
 
-### Module 2 - Workflow Orchestration
+---
 
-### Module 3 - Data Warehouse
+## Environment
 
-### Module 4 - Analytics Engineering
+Homework and the project use **Python** with a local **venv** and **pip** (not `uv`). Commands in module notes assume familiarity with **Windows PowerShell** where relevant.
 
-### Module 5 - Batch Processing
+Each module folder includes its own **`requirements.txt`** (and often a `*.md` homework write-up).
 
-### Module 6 - Streaming
+---
 
-### Repo Directory Setup:
+## Modules in this repository
+
+| Module | Topic | Notes / entry point |
+|--------|--------|---------------------|
+| 1 | Docker & Terraform | [`module_1_docker_terraform/module1.md`](module_1_docker_terraform/module1.md) |
+| 2 | Workflow orchestration | [`module_2_workflow_orchestration/module2.md`](module_2_workflow_orchestration/module2.md) |
+| 3 | Data warehouse | BigQuery homework SQL and scripts in [`module_3_data_warehouse/`](module_3_data_warehouse/) |
+| 4 | Analytics engineering | [`module_4_anlytics_engineering/module4_setup.md`](module_4_anlytics_engineering/module4_setup.md) |
+| 5 | Streaming | *(not present as a folder in this repo)* |
+| 6 | Batch processing | [`module_6_batch_processing/module_6.md`](module_6_batch_processing/module_6.md) |
+
+The Zoomcamp curriculum also lists Module 5 (streaming); only the folders above are included here.
+
+---
+
+## Repository layout
 
 ```
-| data-engineering-zoomcamp-2026
-|__| module_1_docker_terraform
-|____| ny_taxi_postgres_data
-|______ Dockerfile
-|______ output_day_10.parquet
-|______ pipeline.py
-|______ requirements.txt
-|__| module_2_workflow_orchestration
-|____| working_directory
-|______ requirements.txt
-|__| module_3_data_warehouse
-|____| working_directory
-|______ requirements.txt
-|__| module_4_analytics_engineering
-|____| working_directory
-|______ requirements.txt
-|__| module_5_batch_procressing
-|____| working_directory
-|______ requirements.txt
-|__| module_6_streaming
-|____| working_directory
-|______ requirements.txt
-|__| final_project
-|____| working_directory
-|______ requirements.txt
-|__.gitignore
-|__ README.md
+data-engineering-zoomcamp-2026/
+├── README.md
+├── final_project/                 # Capstone — README, dbt, Airflow, infra, dashboard notes
+├── module_1_docker_terraform/
+├── module_2_workflow_orchestration/
+├── module_3_data_warehouse/
+├── module_4_anlytics_engineering/
+├── module_6_batch_processing/
+└── .gitignore
 ```

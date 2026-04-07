@@ -1,6 +1,8 @@
-# Airflow + warehouse Postgres. Run from Q2_infra/: docker compose up -d
-# Airflow UI: :8082 (admin/admin). insurance_dwh: set POSTGRES_* in root .env.
-# EC2 / all-Docker: POSTGRES_HOST=warehouse. Local host Postgres: POSTGRES_HOST=host.docker.internal
+# Airflow + warehouse Postgres + optional Streamlit (Text-to-SQL).
+# Run from infra/: docker compose --env-file ../.env up -d
+# Airflow UI: http://<host>:8082 (admin/admin). Streamlit: http://<host>:8501
+# EC2: same Elastic IP for :8082 and :8501 — open both in the security group.
+# EC2 / all-Docker: POSTGRES_HOST=warehouse in .env for Airflow. Streamlit service forces warehouse internally.
 
 x-common-env: &common-env
   AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -102,6 +104,28 @@ services:
         condition: service_completed_successfully
       warehouse:
         condition: service_healthy
+
+  # Text-to-SQL for reviewers — bind 0.0.0.0:8501 inside container; published on host :8501
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    ports:
+      - "8501:8501"
+    # Load secrets from final_project/.env into the container (works even if you forget --env-file on `up`).
+    # `environment` below overrides keys that must differ from .env (e.g. laptop .env has POSTGRES_HOST=localhost).
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_HOST: warehouse
+      POSTGRES_PORT: "5432"
+    volumes:
+      - ../streamlit_app:/app/streamlit_app:ro
+      - ../.env:/app/.env:ro
+    depends_on:
+      warehouse:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_airflow_data:
