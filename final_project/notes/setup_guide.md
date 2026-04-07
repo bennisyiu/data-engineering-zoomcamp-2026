@@ -149,7 +149,7 @@ Permissions are set via `chmod 400` (Linux/Mac) or icacls on Windows. `*.pem` is
 
 ### 7.3 Security group
 
-A security group is created; ingress is added for SSH (restricted IP), 8080 (Airflow), and 5432 (PostgreSQL for reviewer access). The host IP is obtained via `curl ifconfig.me`.
+A security group is created; ingress is added for SSH (restricted IP), 8082 (Airflow UI), and 5432 (PostgreSQL for reviewer access). The host IP is obtained via `curl ifconfig.me`.
 
 ### 7.4 Launch instance
 
@@ -162,7 +162,7 @@ AMI IDs are region-specific; the example is Amazon Linux 2. For Ubuntu, the curr
 ### 7.5 SSH
 
 ```bash
-ssh -i insurance-dwh-key.pem ec2-user@<EC2_PUBLIC_IP>
+ssh -i insurance-dwh-key.pem ec2-user@52.221.114.40
 ```
 
 Use `ubuntu@` if the AMI is Ubuntu.
@@ -177,7 +177,7 @@ The repo is cloned on the instance, `infra/.env.example` is copied to `.env` and
 
 ### 7.8 Check
 
-Airflow is available at `http://<EC2_PUBLIC_IP>:8082`. The DAG is triggered to verify the pipeline.
+Airflow is available at `http://52.221.114.40:8082`. The DAG is triggered to verify the pipeline.
 
 ### 7.9 Cost
 
