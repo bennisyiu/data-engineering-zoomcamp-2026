@@ -79,7 +79,7 @@ Use the **same credentials as in your root `.env`** on the server:
 
 | Field    | Value |
 |----------|--------|
-| **Host** | EC2 public IP (e.g. `18.142.43.130`) |
+| **Host** | EC2 Elastic IP `52.221.114.40` (or current public IP if it changes) |
 | **Port** | `5432` |
 | **Database** | `insurance_dwh` (or `POSTGRES_DB` from `.env`) |
 | **User** | `POSTGRES_USER` from `.env` |
