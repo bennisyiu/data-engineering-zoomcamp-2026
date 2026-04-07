@@ -173,11 +173,11 @@ On Amazon Linux 2: Docker is installed via yum, the service is started, the user
 
 ### 7.7 Deploy
 
-The repo is cloned on the instance, `infra/.env.example` is copied to `.env` and populated, then `cd infra` and `docker compose up -d` are run.
+The repo is cloned on the instance, `infra/.env.example` is copied to the repo root as `.env` and populated (`POSTGRES_HOST=warehouse` on EC2, warehouse credentials, optional S3 and `OPENROUTER_*` for Streamlit), then from `infra`: `docker compose --env-file ../.env up -d` (and `docker compose --env-file ../.env build streamlit` when the Streamlit image changed).
 
 ### 7.8 Check
 
-Airflow is available at `http://52.221.114.40:8082`. The DAG is triggered to verify the pipeline.
+Airflow: `http://52.221.114.40:8082`. Streamlit (if enabled): `http://52.221.114.40:8501`. Open **8082**, **8501**, and **5432** in the security group as needed. Trigger the DAG to verify the pipeline.
 
 ### 7.9 Cost
 

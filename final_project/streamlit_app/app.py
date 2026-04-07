@@ -22,6 +22,7 @@ load_dotenv(REPO_ROOT / ".env")
 OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 # Override with OPENROUTER_MODEL in .env; confirm slug at https://openrouter.ai/models
 DEFAULT_MODEL = "qwen/qwen3.5-flash-02-23"
+_MODEL_TYPO = "qwen/qwen3.5-flash-02-23s"
 
 # Matches final_project dbt marts (six models; no mart_exec_summary)
 MARTS_SCHEMA_DOC = """
@@ -145,7 +146,9 @@ def main():
     )
 
     api_key = os.getenv("OPENROUTER_API_KEY")
-    model = os.getenv("OPENROUTER_MODEL", DEFAULT_MODEL)
+    model = (os.getenv("OPENROUTER_MODEL") or DEFAULT_MODEL).strip()
+    if model == _MODEL_TYPO:
+        model = DEFAULT_MODEL
     if not api_key:
         st.error(
             "Set `OPENROUTER_API_KEY` in `final_project/.env` (see `infra/.env.example`) "
@@ -192,6 +195,12 @@ def main():
                 st.info(
                     "403 often means the model is unavailable for your key. Pick another slug at "
                     "https://openrouter.ai/models."
+                )
+            elif "not a valid model" in msg or ("400" in str(e) and "model" in msg):
+                st.info(
+                    "Use an exact model slug from [openrouter.ai/models](https://openrouter.ai/models). "
+                    "Typo: `qwen/qwen3.5-flash-02-23s` → `qwen/qwen3.5-flash-02-23` (no trailing **s**). "
+                    "Fix `final_project/.env` and recreate the `streamlit` container."
                 )
             return
 
