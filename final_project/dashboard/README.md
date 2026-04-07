@@ -25,4 +25,4 @@ The dashboard reads from the `marts` schema (exported as CSVs for Tableau Public
 | `mart_new_vs_returning_premium` | New vs returning policy counts and premium |
 | `mart_policy_denormalized` | Policy-level detail with invoice + claim aggregates |
 
-dbt models are designed so the dashboard uses pre-computed metrics without heavy calculated fields. Workbook structure and step-by-step build notes are in [`notes/tableau_dashboard.md`](../notes/tableau_dashboard.md).
+dbt models are designed so the dashboard uses pre-computed metrics without heavy calculated fields. Workbook structure and metrics are summarized in [`notes/tableau_summary.md`](../notes/tableau_summary.md).

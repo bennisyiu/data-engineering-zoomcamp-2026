@@ -2,6 +2,8 @@
 
 Optional demo for **DE Zoomcamp `final_project`**: natural-language questions → LLM-generated SQL → read-only execution against PostgreSQL **`marts`** (same tables built by dbt in this repo).
 
+**Reviewers:** use the public URL your instructor provides (e.g. `http://<Elastic-IP>:8501`). You do **not** need an OpenRouter API key; only the server operator configures that in `.env`.
+
 ## Deploy with Docker Compose (recommended for EC2)
 
 The **`streamlit`** service in [`infra/docker-compose.yml`](../infra/docker-compose.yml) builds from [`infra/Dockerfile.streamlit`](../infra/Dockerfile.streamlit), listens on **`0.0.0.0:8501`**, and connects to the **`warehouse`** container on the Compose network (you do **not** set `POSTGRES_HOST=localhost` for this service — Compose sets `warehouse` for you).
