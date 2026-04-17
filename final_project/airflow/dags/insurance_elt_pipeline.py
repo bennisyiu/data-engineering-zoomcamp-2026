@@ -1,7 +1,7 @@
 """
 Q2: Insurance ELT pipeline DAG.
 Daily run: extract_load (CSV from data/ or S3 → raw schema), then dbt run and dbt test.
-Expects: project mounted at /opt/airflow/repo, host PostgreSQL for insurance_dwh.
+Expects: project mounted at /opt/airflow/repo; Postgres service `warehouse` (Compose network).
 """
 from datetime import datetime
 from airflow import DAG
@@ -30,15 +30,19 @@ with DAG(
     tags=["q2", "elt", "insurance"],
 ) as dag:
 
+    # Inside Compose, DWH is always service `warehouse` on 5432. Shell `export` is reliable even when
+    # Airflow's env merge or a mounted .env would otherwise leave POSTGRES_HOST=localhost.
+    _pg_export = "export POSTGRES_HOST=warehouse POSTGRES_PORT=5432 && "
+
+    _pg_dwh = {**os.environ, "POSTGRES_HOST": "warehouse", "POSTGRES_PORT": "5432"}
+
     load_raw = BashOperator(
         task_id="extract_load_csv_to_raw",
-        bash_command=f"cd {REPO} && python scripts/extract_load.py",
+        bash_command=f"{_pg_export}cd {REPO} && python scripts/extract_load.py",
+        env=_pg_dwh,
     )
 
-    _env = {**os.environ}
-    for key in ("POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"):
-        if key in os.environ:
-            _env[key] = os.environ[key]
+    _env = {**_pg_dwh}
 
     _dbt_prepare = (
         f"set -e && cp {DBT_PROJECT}/profiles.yml.example {PROFILES_DIR}/profiles.yml && "
@@ -46,14 +50,14 @@ with DAG(
     )
     dbt_run = BashOperator(
         task_id="dbt_run",
-        bash_command=f"{_dbt_prepare} && cd {DBT_WORK} && dbt deps && dbt run --profiles-dir {PROFILES_DIR}",
+        bash_command=f"{_pg_export}{_dbt_prepare} && cd {DBT_WORK} && dbt deps && dbt run --profiles-dir {PROFILES_DIR}",
         env=_env,
     )
 
     dbt_test = BashOperator(
         task_id="dbt_test",
         bash_command=(
-            f"set -e && cp {DBT_PROJECT}/profiles.yml.example {PROFILES_DIR}/profiles.yml && "
+            f"{_pg_export}set -e && cp {DBT_PROJECT}/profiles.yml.example {PROFILES_DIR}/profiles.yml && "
             f"cd {DBT_WORK} && dbt test --profiles-dir {PROFILES_DIR}"
         ),
         env=_env,

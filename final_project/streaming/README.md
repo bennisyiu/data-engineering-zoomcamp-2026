@@ -36,11 +36,11 @@ Services `event-producer` and `flink-streaming` start after `kafka-init` complet
 
 ```bash
 docker compose --env-file ../.env exec warehouse \
-  psql -U "$POSTGRES_USER" -d insurance_dwh \
-  -c "SELECT COUNT(*), MAX(received_at) FROM raw_streaming.stream_policy_events;"
+  sh -c 'psql -U "$POSTGRES_USER" -d insurance_dwh \
+  -c "SELECT COUNT(*), MAX(received_at) FROM raw_streaming.stream_policy_events;"'
 ```
 
-(Replace user if your shell does not have `POSTGRES_USER`; use the same credentials as in `.env`.)
+(`sh -c` expands `POSTGRES_USER` inside the container; `$POSTGRES_USER` on the host is often empty.)
 
 ## Local producer only (without Compose streaming services)
 
