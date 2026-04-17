@@ -1,6 +1,6 @@
 # Infrastructure: Airflow + Docker (Local) & Cloud
 
-This folder runs the full ELT: **extract_load** (S3 or local `data/` → Postgres `raw`), then **dbt run** and **dbt test**, orchestrated by Airflow.
+This folder runs the full ELT: **extract_load** (S3 or local `data/` → Postgres `raw`), then **dbt run** and **dbt test**, orchestrated by Airflow, plus an optional **Streamlit** service (Text-to-SQL on port **8501**). The same Compose file also starts **Kafka + Zookeeper**, a demo **event-producer**, and **flink-streaming** (PyFlink job → `raw_streaming.stream_policy_events`); see [`../streaming/README.md`](../streaming/README.md).
 
 ## Requirements
 
@@ -23,6 +23,10 @@ cd ../infra && docker compose --env-file ../.env up -d
 
 First run: init creates Airflow metadata and admin user. After ~30–60s: **http://localhost:8082** — `admin` / `admin`. Trigger DAG **`insurance_elt_pipeline`**.
 
+**Streamlit:** With the same compose, `http://localhost:8501` locally or `http://<Elastic-IP>:8501` on EC2. The container uses **`POSTGRES_HOST=warehouse`** on the Docker network; add **`OPENROUTER_API_KEY`** (and optionally `OPENROUTER_MODEL`) to root `.env` so the app can call OpenRouter. Rebuild after Dockerfile changes: `docker compose --env-file ../.env build streamlit && docker compose --env-file ../.env up -d`.
+
+**Streaming stack:** Kafka is published on host **`9092`** (for local producers outside Docker). Zookeeper, Kafka, Flink, and the demo producer add CPU/RAM usage — on **EC2**, prefer at least **t3.large** (or stop `event-producer` / `flink-streaming` when not demoing). If the warehouse volume was created **before** `raw_streaming` existed, run `infra/scripts/add_raw_streaming.sql` once against `insurance_dwh`.
+
 ## Architecture
 
 | Service   | Role |
@@ -30,6 +34,11 @@ First run: init creates Airflow metadata and admin user. After ~30–60s: **http
 | **postgres** | Airflow metadata DB only |
 | **warehouse** | PostgreSQL for **insurance_dwh** (dbt + extract_load) |
 | **airflow-*** | Scheduler + webserver; mounts `airflow/dags`, `scripts`, `data`, `dbt_project`, root `.env` |
+| **streamlit** | Text-to-SQL UI; image from `Dockerfile.streamlit`; connects to **warehouse**; publishes **8501** |
+| **zookeeper** + **kafka** | Kafka broker for streaming demo; **9092** on host |
+| **kafka-init** | Creates topic `policy_events` once per `up` |
+| **event-producer** | Publishes synthetic JSON events to Kafka |
+| **flink-streaming** | PyFlink DataStream job: Kafka → JDBC → `raw_streaming.stream_policy_events` |
 
 Default **`POSTGRES_HOST=warehouse`**. To use Postgres on your laptop instead, set **`POSTGRES_HOST=host.docker.internal`** in `.env` and add under Airflow services in `docker-compose.yml` if on Linux:
 
@@ -40,7 +49,9 @@ extra_hosts:
 
 ## EC2
 
-Same compose; security group **8082** for Airflow UI. Set `.env` on the instance with warehouse credentials and, if using S3, **`S3_BUCKET_NAME`**. See [S3_SETUP.md](S3_SETUP.md).
+Same compose. **Security group inbound:** **8082** (Airflow UI), **8501** (Streamlit), **5432** (Postgres, if reviewers connect from outside), **22** (SSH). Use the **same Elastic IP** for Airflow and Streamlit — reviewers open `http://<Elastic-IP>:8082` and `http://<Elastic-IP>:8501`.
+
+Set `.env` on the instance with **`POSTGRES_HOST=warehouse`** (required for containers to reach the warehouse; do not use `localhost` on EC2 for Airflow). Include **`OPENROUTER_API_KEY`** for Streamlit. If using S3, set **`S3_BUCKET_NAME`**. See [S3_SETUP.md](S3_SETUP.md).
 
 ### ⚠️ Disk space (important)
 
@@ -69,7 +80,7 @@ Same compose; security group **8082** for Airflow UI. Set `.env` on the instance
 
 The **warehouse** container exposes **port 5432** on the host so you can connect from your laptop.
 
-1. **EC2 security group:** Add an **inbound rule**: Type **PostgreSQL**, Port **5432**, Source **My IP** (or **0.0.0.0/0** for testing only).
+1. **EC2 security group:** Add inbound rules as needed: **Custom TCP 8501** (Streamlit), **PostgreSQL 5432** (optional external DB tools), **Custom TCP 8082** (Airflow). Prefer **My IP** / a tight CIDR (avoid **0.0.0.0/0** except for short demos).
 2. **Restart the stack** so the port is published (if you just added `ports: 5432` to the compose):
    ```bash
    cd infra && sudo docker compose --env-file ../.env up -d
@@ -79,7 +90,7 @@ Use the **same credentials as in your root `.env`** on the server:
 
 | Field    | Value |
 |----------|--------|
-| **Host** | EC2 public IP (e.g. `18.142.43.130`) |
+| **Host** | EC2 Elastic IP `52.221.114.40` (or current public IP if it changes) |
 | **Port** | `5432` |
 | **Database** | `insurance_dwh` (or `POSTGRES_DB` from `.env`) |
 | **User** | `POSTGRES_USER` from `.env` |

@@ -10,19 +10,26 @@ An insurance company generates transactional data across three domains — **pol
 
 This project solves that by building a **full ELT pipeline**: raw CSVs are extracted and loaded into a PostgreSQL data warehouse via Python, transformed through a medallion architecture (raw → staging → intermediate → marts) using **dbt**, orchestrated end-to-end by **Apache Airflow**, and deployed on **AWS EC2 + S3**. The result is a set of clean, tested analytical tables that feed a **Tableau dashboard** with key insurance KPIs — no manual data wrangling required.
 
+**AI-assisted exploration:** A **Streamlit** app adds **natural-language Text-to-SQL** over the same dbt **`marts`** (see [AI-assisted analytics (Streamlit)](#ai-assisted-analytics-streamlit) below). The LLM proposes read-only SQL; the app validates and runs it against PostgreSQL. This complements Tableau; it is not a substitute for the dashboard deliverable.
+
 ---
 
 ## Access for Reviewers
+
+Live URLs below assume **Docker Compose from this `final_project`** (or an equivalent clone with the same services) is running on the EC2 instance behind Elastic IP **`52.221.114.40`**, with the security group allowing inbound **8082**, **8501**, and **5432** as needed. If the IP changes, update this README and notify reviewers.
 
 | What                    | Where                                                                                                                                                                                           |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Code, SQL, dbt models   | This repo                                                                                                                                                                                       |
 | Setup and Tableau notes | [`notes/`](notes/) (setup_guide.md, tableau_summary.md)                                                                                                                                         |
-| Airflow UI (on EC2)     | `http://18.142.43.130:8082` — `admin` / `admin` (see [`infra/INFRA.md`](infra/INFRA.md))                                                                                                        |
-| Database (PostgreSQL)   | `18.142.43.130:5432` / `insurance_dwh` — read-only credentials shared via email (see below)                                                                                                     |
-| Tableau dashboard       | [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link) (4 dashboards as a Story)                                   |
+| Airflow UI              | `http://52.221.114.40:8082` — username **`admin`**, password **`admin`** (default from compose init; see [`infra/INFRA.md`](infra/INFRA.md))                                                     |
+| PostgreSQL warehouse    | Host **`52.221.114.40`**, port **`5432`**, database **`insurance_dwh`** — **`POSTGRES_USER`** / **`POSTGRES_PASSWORD`** match the values on the server’s root `.env` (share read-only access with reviewers by email; do not commit passwords) |
+| Tableau Public          | [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link) — no login required to view (4 dashboards as a Story)        |
+| Streamlit Text-to-SQL   | **`http://52.221.114.40:8501`** — no reviewer login; **`OPENROUTER_API_KEY`** is configured only on the server (see [`streamlit_app/README.md`](streamlit_app/README.md))                         |
 | Architecture diagrams   | [High-Level](docs/High-Level%20Architecture_drawio_image.png), [ELT Pipeline](<docs/ELT Pipeline (Airflow DAG)_drawio_image.png>), [Data Lineage](docs/Data%20Model%20Lineage_drawio_image.png) |
 | Docker & cloud          | [`infra/INFRA.md`](infra/INFRA.md). **EC2:** use ≥30 GB root volume (default 8 GB fills and breaks the pipeline).                                                                               |
+
+**Reviewer checklist (what should work):** (1) Open Airflow URL and sign in with **`admin` / `admin`**. (2) Connect to Postgres with the **host, port, database, user, and password** you supplied by email (same as server `.env`). (3) Open the Tableau link. (4) Open Streamlit and run a plain-English question; results should load if the warehouse has **`marts`** built and OpenRouter is configured on the host.
 
 ---
 
@@ -39,6 +46,7 @@ This project solves that by building a **full ELT pipeline**: raw CSVs are extra
 - [Data Warehouse & Data Model](#data-warehouse--data-model)
 - [Transformations (dbt)](#transformations-dbt)
 - [Dashboard](#dashboard)
+- [AI-assisted analytics (Streamlit)](#ai-assisted-analytics-streamlit)
 - [Cloud Infrastructure](#cloud-infrastructure)
 - [Reproducibility / Getting Started](#reproducibility--getting-started)
 - [Notes (plan & thought process)](#notes-plan--thought-process)
@@ -65,7 +73,9 @@ This project solves that by building a **full ELT pipeline**: raw CSVs are extra
 | SQL              | PostgreSQL 15                          | Warehouse queries, dbt backend                                   |
 | Transformations  | dbt Core + dbt-postgres                | Medallion architecture (raw → staging → intermediate → marts)    |
 | Orchestration    | Apache Airflow 2.x + astronomer-cosmos | Centralized scheduling, workflow automation, dbt task visibility |
+| Stream processing | Apache Flink (PyFlink) + Kafka        | Event stream → `raw_streaming.stream_policy_events` ([`streaming/`](streaming/)) |
 | Dashboard        | Tableau Public                         | Interactive analytics dashboard (public URL)                     |
+| Ad hoc analytics | Streamlit + OpenRouter                 | Optional Text-to-SQL over `marts` ([`streamlit_app/`](streamlit_app/)) |
 | Containerization | Docker + Docker Compose                | Reproducible deployment (Airflow + PostgreSQL + dbt)             |
 | Cloud            | AWS EC2 + S3                           | Hosting (EC2), Data Lake (S3)                                    |
 | Version Control  | Git + GitHub                           | Source control                                                   |
@@ -115,14 +125,28 @@ final_project/
 ├── dashboard/                           # Analytics Dashboard (Tableau)
 │   └── README.md                        # Public URL + screenshots
 │
+├── streamlit_app/                       # Optional Text-to-SQL UI (OpenRouter + marts)
+│   ├── app.py
+│   └── README.md
+│
 ├── infra/                               # Docker & Cloud deployment
 │   ├── docker-compose.yml
 │   ├── Dockerfile
+│   ├── Dockerfile.streamlit
+│   ├── streamlit-requirements.txt
 │   ├── .env.example
 │   ├── INFRA.md                         # Local Docker + cloud architecture
 │   ├── scripts/
-│   │   └── init_warehouse.sql
+│   │   ├── init_warehouse.sql
+│   │   └── add_raw_streaming.sql        # One-off migration if warehouse already existed
 │   └── ...
+│
+├── streaming/                           # PyFlink: Kafka → Postgres stream landing zone
+│   ├── README.md
+│   ├── job.py
+│   ├── producer.py
+│   ├── Dockerfile
+│   └── Dockerfile.producer
 │
 └── scripts/                             # Python EL scripts
     ├── extract_load.py                  # CSV → S3 → PostgreSQL (raw schema)
@@ -157,6 +181,15 @@ A single Airflow DAG (`insurance_elt_pipeline`) runs the full ELT flow end-to-en
 
 ![ELT Pipeline (Airflow DAG)](<docs/ELT%20Pipeline%20(Airflow%20DAG)_drawio_image.png>)
 
+### Streaming path (PyFlink + Kafka)
+
+In parallel with the **batch** DAG above, a small **stream ingestion** leg runs in the same Docker Compose stack:
+
+1. **`event-producer`** publishes JSON events to Kafka topic `policy_events`.
+2. **`flink-streaming`** runs a **PyFlink** job (DataStream API: `FlinkKafkaConsumer` + `JdbcSink`) that reads from Kafka and writes rows into **`raw_streaming.stream_policy_events`**.
+
+This does **not** replace the CSV → S3 → `raw` load or existing dbt models; it is a **stream landing zone** for course/streaming criteria. A future dbt iteration could add `staging` models from `raw_streaming` (see [`streaming/README.md`](streaming/README.md)).
+
 ---
 
 ## Data Warehouse & Data Model
@@ -166,6 +199,7 @@ The data warehouse uses a **medallion layout** in PostgreSQL: `raw` (load as-is)
 | Layer      | Schema         | What's in it                                                                                     |
 | ---------- | -------------- | ------------------------------------------------------------------------------------------------ |
 | **Bronze** | `raw`          | `raw_policy`, `raw_invoice`, `raw_claim`                                                         |
+| **Bronze** | `raw_streaming` | `stream_policy_events` (append-only events from PyFlink; not used by current dbt marts)         |
 | **Silver** | `staging`      | `stg_policy`, `stg_invoice`, `stg_claim`                                                         |
 | **Silver** | `intermediate` | `int_policy_ranked`, `int_invoice_paid`                                                          |
 | **Gold**   | `marts`        | New vs returning, denormalized policy, and dashboard marts (daily, rollups, monthly, by product) |
@@ -201,6 +235,25 @@ A Tableau Story with **4 interactive dashboards**:
 
 Metrics are pre-computed in dbt marts so the dashboard uses `mart_dashboard_monthly`, `mart_dashboard_rollups`, `mart_dashboard_by_product`, `mart_new_vs_returning_premium`, and `mart_policy_denormalized` without heavy calculated fields. Details in [dashboard/README.md](dashboard/README.md).
 
+See [AI-assisted analytics (Streamlit)](#ai-assisted-analytics-streamlit) for how the AI layer works and how to run it.
+
+---
+
+## AI-assisted analytics (Streamlit)
+
+This project includes an optional **Streamlit** web app that uses a **large language model via [OpenRouter](https://openrouter.ai/)** to turn **plain-English questions** into **SQL**, then executes that SQL as **read-only** queries against the **`marts`** schema (the same dbt models that feed Tableau).
+
+**How it works (end-to-end):**
+
+1. The reviewer types a question (for example, “top policies by claim amount in 2020”).
+2. The app sends the question plus a **fixed schema description** of the `marts` tables to OpenRouter; the model returns a single **SELECT** (or **WITH … SELECT**) statement.
+3. The app **rejects** non-read-only SQL (no `INSERT`, `UPDATE`, `DROP`, etc.), ensures a **row limit** (default cap **200**), and runs the query against the warehouse using **SQLAlchemy**.
+4. Results appear as a table in the browser.
+
+**Deployment:** On EC2, the **`streamlit`** service in [`infra/docker-compose.yml`](infra/docker-compose.yml) listens on **port 8501** and connects to the **`warehouse`** container on the Docker network. The server’s root **`.env`** must include **`OPENROUTER_API_KEY`** (and optionally **`OPENROUTER_MODEL`** — use an exact slug from [openrouter.ai/models](https://openrouter.ai/models), e.g. `qwen/qwen3.5-flash-02-23` without a trailing typo). Reviewers only need the public URL; they do **not** receive an OpenRouter key.
+
+**Local use:** From `final_project`, install [`requirements.txt`](requirements.txt), configure `.env`, and run `streamlit run streamlit_app/app.py` (see [streamlit_app/README.md](streamlit_app/README.md)).
+
 ---
 
 ## Cloud Infrastructure
@@ -210,7 +263,7 @@ The entire stack is deployed on **AWS**:
 | Service            | Role                                                                         |
 | ------------------ | ---------------------------------------------------------------------------- |
 | **S3**             | Data lake — raw CSVs stored under `raw/` prefix                              |
-| **EC2** (t3.small) | Hosts Airflow, PostgreSQL (warehouse + metadata), and dbt via Docker Compose |
+| **EC2** (t3.small or larger) | Hosts Airflow, PostgreSQL (warehouse + metadata), dbt, Streamlit, and optional Kafka + PyFlink via Docker Compose (see [`infra/INFRA.md`](infra/INFRA.md) for sizing) |
 
 The same `docker-compose.yml` used locally runs on EC2 with no changes. Security, reliability, and cost (~$0–10/month on free tier) are documented in [`infra/INFRA.md`](infra/INFRA.md). IaC-style deployment scripts are in `infra/scripts/`.
 
@@ -222,9 +275,11 @@ Local setup requires Python 3.10+, PostgreSQL 15, Docker Compose, dbt-core + dbt
 
 **Local run (no Docker):** Clone the repo, run `pip install -r requirements.txt`, copy `infra/.env.example` to `.env` and set Postgres (and AWS if needed). Then run `python scripts/extract_load.py` and from `dbt_project`: `dbt deps`, `dbt run`, `dbt test`.
 
-**Full pipeline (Docker):** From the repo root, `cd infra` and `docker compose --env-file ../.env up -d` (so root `.env` is loaded). On first run the init container creates the Airflow DB and admin user; after ~30–60 seconds the UI is available at http://localhost:8082 (login `admin` / `admin`). The `insurance_elt_pipeline` DAG runs the full ELT when triggered.
+**Full pipeline (Docker):** From the repo root, `cd infra` and `docker compose --env-file ../.env build` (first time builds Airflow, Streamlit, **event-producer**, and **flink-streaming**), then `docker compose --env-file ../.env up -d` (so root `.env` is loaded). On first run the init container creates the Airflow DB and admin user; after ~30–60 seconds the UI is available at http://localhost:8082 (login `admin` / `admin`). The `insurance_elt_pipeline` DAG runs the full ELT when triggered. **Streaming:** Kafka starts on **9092**; PyFlink writes to `raw_streaming.stream_policy_events`. If your **warehouse** data volume was created before that schema existed, run `infra/scripts/add_raw_streaming.sql` once (see [`streaming/README.md`](streaming/README.md)).
 
 **S3 (pipeline reads CSVs from S3):** Create a bucket, set `S3_BUCKET_NAME` in `.env`, then run `python scripts/upload_to_s3.py` from the repo root to upload `data/*.csv` under `raw/`. See [infra/S3_SETUP.md](infra/S3_SETUP.md).
+
+**Streamlit Text-to-SQL:** On EC2, use Docker Compose (includes a **`streamlit`** service on port **8501**). Put `OPENROUTER_API_KEY` (and optionally `OPENROUTER_MODEL`) in `final_project/.env`, ensure **`POSTGRES_HOST=warehouse`** on the server for Airflow/warehouse wiring, open **8501** in the security group, then `cd infra && docker compose --env-file ../.env up -d`. Reviewers: **`http://<Elastic-IP>:8501`**. For a quick run on your laptop without Docker, see [streamlit_app/README.md](streamlit_app/README.md) (`POSTGRES_HOST=localhost` when port 5432 is published).
 
 ---
 
