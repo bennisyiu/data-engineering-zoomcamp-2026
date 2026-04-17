@@ -26,10 +26,11 @@ Live URLs below assume **Docker Compose from this `final_project`** (or an equiv
 | PostgreSQL warehouse    | Host **`52.221.114.40`**, port **`5432`**, database **`insurance_dwh`** — **`POSTGRES_USER`** / **`POSTGRES_PASSWORD`** match the values on the server’s root `.env` (share read-only access with reviewers by email; do not commit passwords) |
 | Tableau Public          | [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link) — no login required to view (4 dashboards as a Story)        |
 | Streamlit Text-to-SQL   | **`http://52.221.114.40:8501`** — no reviewer login; **`OPENROUTER_API_KEY`** is configured only on the server (see [`streamlit_app/README.md`](streamlit_app/README.md))                         |
+| Streaming (Kafka → Flink → Postgres) | No web UI. Verify in **pgAdmin/SQL**: schema **`raw_streaming`**, table **`stream_policy_events`** ([`streaming/README.md`](streaming/README.md)). Kafka on **9092** speaks the Kafka protocol only — **`http://…:9092` will not load in a browser**. |
 | Architecture diagrams   | [High-Level](docs/High-Level%20Architecture_drawio_image.png), [ELT Pipeline](<docs/ELT Pipeline (Airflow DAG)_drawio_image.png>), [Data Lineage](docs/Data%20Model%20Lineage_drawio_image.png) |
 | Docker & cloud          | [`infra/INFRA.md`](infra/INFRA.md). **EC2:** use ≥30 GB root volume (default 8 GB fills and breaks the pipeline).                                                                               |
 
-**Reviewer checklist (what should work):** (1) Open Airflow URL and sign in with **`admin` / `admin`**. (2) Connect to Postgres with the **host, port, database, user, and password** you supplied by email (same as server `.env`). (3) Open the Tableau link. (4) Open Streamlit and run a plain-English question; results should load if the warehouse has **`marts`** built and OpenRouter is configured on the host.
+**Reviewer checklist (what should work):** (1) Open Airflow URL and sign in with **`admin` / `admin`**. (2) Connect to Postgres with the **host, port, database, user, and password** you supplied by email (same as server `.env`). (3) Open the Tableau link. (4) Open Streamlit and run a plain-English question; results should load if the warehouse has **`marts`** built and OpenRouter is configured on the host. (5) **Streaming (optional):** With Docker Compose running on EC2, **`event-producer`** and **`flink-streaming`** should be **Up** (`docker compose ps`). In pgAdmin, **`raw_streaming.stream_policy_events`** should show rows (`COUNT(*)` increases over time). Details: [`streaming/README.md`](streaming/README.md).
 
 ---
 
@@ -76,7 +77,7 @@ Live URLs below assume **Docker Compose from this `final_project`** (or an equiv
 | Stream processing | Apache Flink (PyFlink) + Kafka        | Event stream → `raw_streaming.stream_policy_events` ([`streaming/`](streaming/)) |
 | Dashboard        | Tableau Public                         | Interactive analytics dashboard (public URL)                     |
 | Ad hoc analytics | Streamlit + OpenRouter                 | Optional Text-to-SQL over `marts` ([`streamlit_app/`](streamlit_app/)) |
-| Containerization | Docker + Docker Compose                | Reproducible deployment (Airflow + PostgreSQL + dbt)             |
+| Containerization | Docker + Docker Compose                | Reproducible deployment (Airflow + PostgreSQL + dbt + Kafka / PyFlink streaming) |
 | Cloud            | AWS EC2 + S3                           | Hosting (EC2), Data Lake (S3)                                    |
 | Version Control  | Git + GitHub                           | Source control                                                   |
 | Secrets          | `.env` (Docker env vars)               | Local config; Secrets Manager recommended for production         |

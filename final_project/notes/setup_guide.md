@@ -179,6 +179,8 @@ The repo is cloned on the instance, `infra/.env.example` is copied to the repo r
 
 Airflow: `http://52.221.114.40:8082`. Streamlit (if enabled): `http://52.221.114.40:8501`. Open **8082**, **8501**, and **5432** in the security group as needed. Trigger the DAG to verify the pipeline.
 
+The same Compose stack also starts **Kafka, Zookeeper, event-producer, and flink-streaming** (see [`../streaming/README.md`](../streaming/README.md)). Optional: in pgAdmin/SQL, confirm **`raw_streaming.stream_policy_events`** has rows while those containers are **Up**. Port **9092** is the Kafka broker (not HTTP — it will not open in a browser).
+
 ### 7.9 Cost
 
 The instance is stopped when not in use (`aws ec2 stop-instances`) and started when needed. After submission, the instance can be terminated and the S3 bucket removed if desired.

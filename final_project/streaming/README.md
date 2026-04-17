@@ -42,6 +42,13 @@ docker compose --env-file ../.env exec warehouse \
 
 (`sh -c` expands `POSTGRES_USER` inside the container; `$POSTGRES_USER` on the host is often empty.)
 
+**Operational notes**
+
+- **`flink-streaming`** loads connector JARs from `/opt/flink/lib` (includes **`kafka-clients`** for the Kafka consumer). After changing [`Dockerfile`](Dockerfile), rebuild:  
+  `docker compose --env-file ../.env build flink-streaming && docker compose --env-file ../.env up -d flink-streaming`.
+- Check logs if the table stays empty or the Flink container restarts:  
+  `docker compose --env-file ../.env logs -f flink-streaming event-producer`.
+
 ## Local producer only (without Compose streaming services)
 
 If Kafka is exposed on `localhost:9092`:
