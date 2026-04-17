@@ -162,6 +162,12 @@ celerybeat.pid
 # Environments
 .env
 .envrc
+# OneDrive / machine sync copies (must never be committed — often contain real secrets)
+-*DESKTOP*.env
+.env-*DESKTOP*.example
+README-DESKTOP*.md
+**/README-DESKTOP*.md
+requirements-DESKTOP*.txt
 .venv
 env/
 venv/
