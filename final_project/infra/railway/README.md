@@ -116,8 +116,9 @@ not consume it.
 
 The production migration was exercised end to end on 2026-09-04:
 
-- Streamlit reported healthy after its Railway database and OpenRouter
-  variables were configured.
+- Streamlit completed an end-to-end Text-to-SQL request through OpenRouter and
+  the least-privilege Railway reader, returning 78 new and 618 returning
+  policies (696 total).
 - The scheduled pipeline uploaded all three source CSVs, loaded 6,583 policies,
   9,646 invoices, and 791 claims, then passed all 29 dbt models/tests.
 - Airflow initialized its dedicated metadata database; both the metadatabase

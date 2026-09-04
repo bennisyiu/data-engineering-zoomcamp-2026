@@ -20,6 +20,7 @@ In the Railway project canvas, confirm:
 2. Allow several seconds for a serverless cold start.
 3. Submit: `How many policies are there?`
 4. Confirm the app displays generated read-only SQL and a result.
+   The current mart result is 696 policies: 78 new and 618 returning.
 5. Also try:
    - `Compare new and returning customers by policy count and average net premium.`
    - `Which products have the highest loss ratio in the latest month?`
