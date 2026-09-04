@@ -58,6 +58,8 @@ database role.
 **Reviewer checklist:** (1) Open Tableau. (2) Open Streamlit, allow a few
 seconds for its serverless cold start, and run a plain-English question.
 (3) Review the preserved AWS architecture and the Railway migration below.
+The owner-facing pre-retirement test procedure is
+[`infra/railway/ACCEPTANCE_TEST.md`](infra/railway/ACCEPTANCE_TEST.md).
 
 ### Historical AWS reviewer endpoints
 

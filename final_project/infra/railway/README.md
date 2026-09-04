@@ -4,6 +4,9 @@ This directory contains the immutable images and entrypoints used to run the
 insurance analytics portfolio on Railway. The original AWS/EC2 Docker Compose
 deployment remains in `infra/docker-compose.yml`.
 
+Before approving permanent AWS deletion, complete
+[`ACCEPTANCE_TEST.md`](ACCEPTANCE_TEST.md).
+
 ## Cost-aware production services
 
 | Service | Source | Runtime |
