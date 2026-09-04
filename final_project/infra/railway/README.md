@@ -43,6 +43,9 @@ and exits. The production schedule is `0 3 * * 0` (Sunday 03:00 UTC).
 - `OPENROUTER_SITE_URL`
 - `OPENROUTER_APP_NAME`
 
+Add `OPENROUTER_API_KEY` in the `streamlit` service's Railway **Variables**
+tab. Never commit its value to `.env` or Git.
+
 The reader login has access only to `marts`, defaults to read-only
 transactions, has a 15-second statement timeout, and is limited to five
 connections.
@@ -66,8 +69,10 @@ Both use `/final_project` as the root and share:
 - A generated `AIRFLOW__WEBSERVER__SECRET_KEY`
 
 The webserver also receives generated `AIRFLOW_ADMIN_PASSWORD` and is the only
-Airflow service given a temporary public domain. The scheduler unpauses
-`insurance_elt_pipeline` when `AIRFLOW_UNPAUSE_DAG=true`.
+Airflow service given a public domain:
+https://airflow-webserver-production-be4b.up.railway.app. It responds only
+while demo mode is enabled. The scheduler unpauses `insurance_elt_pipeline`
+when `AIRFLOW_UNPAUSE_DAG=true`.
 
 Both services default to `DEMO_MODE=false`, so their containers exit immediately
 without consuming idle compute. Set `DEMO_MODE=true` and redeploy to demonstrate

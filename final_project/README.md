@@ -47,7 +47,7 @@ database role.
 | Current hosting         | Railway — see [`infra/railway/README.md`](infra/railway/README.md)                                                                                                                             |
 | Streamlit Text-to-SQL   | **https://streamlit-production-43ac.up.railway.app** — serverless; allow a few seconds for a cold start                                                                                       |
 | PostgreSQL warehouse    | Private Railway PostgreSQL 15, database **`insurance_dwh`**; not exposed publicly                                                                                                              |
-| Airflow UI              | Railway on-demand interview/demo service; original EC2 UI retired                                                                                                                              |
+| Airflow UI              | [Railway on-demand demo](https://airflow-webserver-production-be4b.up.railway.app) — available only after demo mode is enabled; original EC2 UI retired                                         |
 | Tableau Public          | [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link) — no login required to view (4 dashboards as a Story)        |
 | Architecture diagrams   | [High-Level](docs/High-Level%20Architecture_drawio_image.png), [ELT Pipeline](<docs/ELT Pipeline (Airflow DAG)_drawio_image.png>), [Data Lineage](docs/Data%20Model%20Lineage_drawio_image.png) |
 | Docker & cloud          | Original AWS/local deployment: [`infra/INFRA.md`](infra/INFRA.md); current Railway deployment: [`infra/railway/README.md`](infra/railway/README.md)                                          |
@@ -129,7 +129,7 @@ flowchart LR
 | Containerization | Docker + Docker Compose                | Reproducible deployment (Airflow + PostgreSQL + dbt)             |
 | Cloud            | Railway; originally AWS EC2 + S3       | Current hosting plus preserved original cloud architecture       |
 | Version Control  | Git + GitHub                           | Source control                                                   |
-| Secrets          | `.env` (Docker env vars)               | Local config; Secrets Manager recommended for production         |
+| Secrets          | Railway service variables / local `.env` | Hosted secrets remain in Railway; `.env` is for local use only  |
 
 ---
 
@@ -315,6 +315,8 @@ The cost-optimized live deployment uses one private PostgreSQL 15 service, a
 private S3-compatible Railway Storage Bucket, serverless Streamlit, a weekly
 terminating ELT/dbt cron service, and a monthly logical-backup job. Airflow and
 Kafka/PyFlink use immutable Railway-ready images but run only for demonstrations.
+The live Streamlit service stores `OPENROUTER_API_KEY` as a Railway service
+variable rather than in the repository.
 See [`infra/railway/README.md`](infra/railway/README.md).
 
 ### Original AWS hosting

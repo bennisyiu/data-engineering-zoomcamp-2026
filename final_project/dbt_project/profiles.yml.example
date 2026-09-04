@@ -1,7 +1,5 @@
 # Copy to profiles.yml and set env vars (or fill in for local use).
 # For Docker: POSTGRES_HOST=host.docker.internal and other POSTGRES_* set in docker-compose.
-config:
-  send_anonymous_usage_stats: false
 
 dbt_project:
   target: dev
