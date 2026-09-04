@@ -30,8 +30,9 @@ def main() -> None:
     airflow_password = os.getenv("AIRFLOW_DB_PASSWORD")
     airflow_database = os.getenv("AIRFLOW_DB_NAME", "airflow")
 
-    with psycopg2.connect(admin_url) as connection:
-        connection.autocommit = True
+    connection = psycopg2.connect(admin_url)
+    connection.autocommit = True
+    try:
         database = connection.get_dsn_parameters()["dbname"]
         with connection.cursor() as cursor:
             for schema in SCHEMAS:
@@ -152,6 +153,8 @@ def main() -> None:
                         sql.Identifier(airflow_user),
                     )
                 )
+    finally:
+        connection.close()
 
     print("Railway database schemas and roles initialized.")
 
