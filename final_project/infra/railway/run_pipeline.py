@@ -48,6 +48,9 @@ def main() -> None:
     pipeline_url = env.get("PIPELINE_DATABASE_URL") or admin_url
     add_postgres_variables(env, pipeline_url)
 
+    if env.get("SEED_BUCKET_ON_START", "false").lower() in {"1", "true", "yes"}:
+        run(sys.executable, "scripts/upload_to_s3.py", env=env)
+
     run(sys.executable, "scripts/extract_load.py", env=env)
     if (DBT_PROJECT / "packages.yml").exists():
         run("dbt", "deps", cwd=DBT_PROJECT, env=env)
