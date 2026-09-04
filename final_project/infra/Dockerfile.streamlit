@@ -7,11 +7,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY streamlit-requirements.txt /app/
+COPY infra/streamlit-requirements.txt /app/
 RUN pip install --no-cache-dir -r streamlit-requirements.txt
 
-# streamlit_app/ and .env are bind-mounted at runtime (see docker-compose.yml)
-CMD ["streamlit", "run", "streamlit_app/app.py", \
-     "--server.address=0.0.0.0", \
-     "--server.port=8501", \
-     "--server.headless=true"]
+COPY streamlit_app /app/streamlit_app
+
+# Railway supplies PORT; Docker Compose falls back to 8501.
+CMD ["sh", "-c", "streamlit run streamlit_app/app.py --server.address=0.0.0.0 --server.port=${PORT:-8501} --server.headless=true"]

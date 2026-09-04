@@ -1,0 +1,12 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "infra/railway/Dockerfile.pipeline"
+watchPatterns = [
+  "scripts/**",
+  "data/**",
+  "dbt_project/**",
+  "infra/railway/**",
+]
+
+[deploy]
+restartPolicyType = "NEVER"

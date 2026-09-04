@@ -108,8 +108,8 @@ services:
   # Text-to-SQL for reviewers — bind 0.0.0.0:8501 inside container; published on host :8501
   streamlit:
     build:
-      context: .
-      dockerfile: Dockerfile.streamlit
+      context: ..
+      dockerfile: infra/Dockerfile.streamlit
     ports:
       - "8501:8501"
     # Load secrets from final_project/.env into the container (works even if you forget --env-file on `up`).

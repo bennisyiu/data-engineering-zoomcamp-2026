@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 import re
+import time
 from pathlib import Path
 from urllib.parse import quote_plus
 
@@ -14,6 +15,7 @@ import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError
 
 # final_project/streamlit_app/app.py → repo root for this capstone is parent.parent
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -62,6 +64,15 @@ All tables live in schema `marts`. Use qualified names: marts.<table>.
 
 
 def get_engine():
+    database_url = os.getenv("STREAMLIT_DATABASE_URL") or os.getenv("DATABASE_URL")
+    connect_args = {
+        "connect_timeout": 10,
+        "options": "-c default_transaction_read_only=on -c statement_timeout=15000",
+    }
+    if database_url:
+        url = database_url.replace("postgres://", "postgresql://", 1)
+        return create_engine(url, pool_pre_ping=True, connect_args=connect_args)
+
     host = os.getenv("POSTGRES_HOST", "localhost")
     port = os.getenv("POSTGRES_PORT", "5432")
     user = os.getenv("POSTGRES_USER")
@@ -70,7 +81,29 @@ def get_engine():
     if not user or not password:
         raise ValueError("Set POSTGRES_USER and POSTGRES_PASSWORD in final_project/.env")
     u, p = quote_plus(user), quote_plus(password)
-    return create_engine(f"postgresql://{u}:{p}@{host}:{port}/{db}")
+    return create_engine(
+        f"postgresql://{u}:{p}@{host}:{port}/{db}",
+        pool_pre_ping=True,
+        connect_args=connect_args,
+    )
+
+
+def run_readonly_query(sql: str, attempts: int = 3) -> pd.DataFrame:
+    """Run a query with bounded retries for Railway cold starts/redeploys."""
+    engine = get_engine()
+    try:
+        for attempt in range(1, attempts + 1):
+            try:
+                with engine.connect() as conn:
+                    return pd.read_sql(text(sql), conn)
+            except OperationalError:
+                if attempt == attempts:
+                    raise
+                time.sleep(2 ** (attempt - 1))
+    finally:
+        engine.dispose()
+
+    raise RuntimeError("Query retry loop ended unexpectedly")
 
 
 def validate_readonly_sql(sql: str) -> tuple[bool, str]:
@@ -217,9 +250,7 @@ def main():
         st.info("Appended a row limit for safety.")
 
     try:
-        engine = get_engine()
-        with engine.connect() as conn:
-            df = pd.read_sql(text(sql), conn)
+        df = run_readonly_query(sql)
     except Exception as e:
         st.error(f"Database error: {e}")
         low = str(e).lower()

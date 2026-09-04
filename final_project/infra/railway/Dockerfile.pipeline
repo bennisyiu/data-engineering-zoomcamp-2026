@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gcc libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY infra/railway/pipeline-requirements.txt /app/infra/railway/
+RUN pip install --no-cache-dir -r infra/railway/pipeline-requirements.txt
+
+COPY scripts /app/scripts
+COPY data /app/data
+COPY dbt_project /app/dbt_project
+COPY infra/railway /app/infra/railway
+
+CMD ["python", "infra/railway/run_pipeline.py"]

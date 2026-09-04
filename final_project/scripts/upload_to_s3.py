@@ -1,7 +1,6 @@
 """
-Upload data/*.csv to S3 under a prefix (default raw/).
-Reads S3_BUCKET_NAME and S3_RAW_PREFIX from repo root .env; CLI flags override.
-Run from repo root with AWS credentials (env or ~/.aws/credentials).
+Upload data/*.csv to AWS S3 or S3-compatible storage under raw/ by default.
+Supports Railway Storage Bucket variables as well as standard AWS variables.
 Usage: python scripts/upload_to_s3.py   [uses .env]
        python scripts/upload_to_s3.py --bucket OTHER_BUCKET
 """
@@ -22,9 +21,9 @@ def main():
     from dotenv import load_dotenv
     load_dotenv(_env_path)
 
-    bucket = args.bucket or os.getenv("S3_BUCKET_NAME")
+    bucket = args.bucket or os.getenv("S3_BUCKET_NAME") or os.getenv("BUCKET")
     if not bucket:
-        parser.error("Set S3_BUCKET_NAME in .env or pass --bucket BUCKET")
+        parser.error("Set S3_BUCKET_NAME/BUCKET or pass --bucket BUCKET")
 
     prefix = (args.prefix or os.getenv("S3_RAW_PREFIX") or "raw").rstrip("/") + "/"
 
@@ -32,7 +31,21 @@ def main():
     csv_files = ["policy.csv", "invoice.csv", "claim.csv"]
 
     import boto3
-    s3 = boto3.client("s3")
+    endpoint = os.getenv("S3_ENDPOINT_URL") or os.getenv("ENDPOINT")
+    region = os.getenv("AWS_REGION") or os.getenv("REGION")
+    access_key = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("ACCESS_KEY_ID")
+    secret_key = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("SECRET_ACCESS_KEY")
+    kwargs = {}
+    if endpoint:
+        kwargs["endpoint_url"] = endpoint
+    if region:
+        kwargs["region_name"] = region
+    if access_key:
+        kwargs["aws_access_key_id"] = access_key
+    if secret_key:
+        kwargs["aws_secret_access_key"] = secret_key
+    s3 = boto3.client("s3", **kwargs)
+
     for name in csv_files:
         path = os.path.join(data_dir, name)
         if not os.path.isfile(path):

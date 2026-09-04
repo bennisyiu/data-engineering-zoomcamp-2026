@@ -1,0 +1,14 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "infra/Dockerfile.streamlit"
+watchPatterns = [
+  "streamlit_app/**",
+  "infra/Dockerfile.streamlit",
+  "infra/streamlit-requirements.txt",
+]
+
+[deploy]
+healthcheckPath = "/_stcore/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
