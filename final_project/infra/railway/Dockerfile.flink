@@ -11,6 +11,9 @@ RUN set -eux; \
 
 WORKDIR /opt/flink/usrlib
 COPY --chown=flink:flink streaming/job.py .
+COPY --chown=flink:flink infra/railway/demo_entrypoint.sh /opt/flink/demo_entrypoint.sh
+RUN chmod +x /opt/flink/demo_entrypoint.sh
 
 USER flink
+ENTRYPOINT ["/opt/flink/demo_entrypoint.sh"]
 CMD ["python", "job.py"]

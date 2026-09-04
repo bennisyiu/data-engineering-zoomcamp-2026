@@ -69,8 +69,10 @@ The webserver also receives generated `AIRFLOW_ADMIN_PASSWORD` and is the only
 Airflow service given a temporary public domain. The scheduler unpauses
 `insurance_elt_pipeline` when `AIRFLOW_UNPAUSE_DAG=true`.
 
-Delete the temporary deployments after a demonstration. The Airflow metadata
-database remains in the existing PostgreSQL service for the next demo.
+Both services default to `DEMO_MODE=false`, so their containers exit immediately
+without consuming idle compute. Set `DEMO_MODE=true` and redeploy to demonstrate
+Airflow; restore `false` and redeploy afterward. The Airflow metadata database
+remains in the existing PostgreSQL service for the next demo.
 
 ## On-demand Kafka and Flink demo
 
@@ -78,8 +80,8 @@ Create these temporary Railway services:
 
 | Service | Source |
 |---|---|
-| `zookeeper` | `confluentinc/cp-zookeeper:7.5.0` |
-| `kafka` | `confluentinc/cp-kafka:7.5.0` |
+| `zookeeper` | `infra/railway/Dockerfile.zookeeper` |
+| `kafka` | `infra/railway/Dockerfile.kafka` |
 | `event-producer` | `infra/railway/Dockerfile.producer` |
 | `flink-streaming` | `infra/railway/Dockerfile.flink` |
 
@@ -94,8 +96,10 @@ Verification:
 1. Start ZooKeeper, then Kafka.
 2. Start the producer and Flink services.
 3. Confirm new rows arrive in `raw_streaming.stream_policy_events`.
-4. Capture the demonstration evidence, then delete the four temporary
-   deployments to stop compute charges.
+4. Capture the demonstration evidence.
+5. Set `DEMO_MODE=false` on all four services and redeploy. Their entrypoints
+   exit successfully, leaving the Railway service definitions in place without
+   continuous compute charges.
 
 The stream is intentionally a landing-zone demonstration; current dbt marts do
 not consume it.

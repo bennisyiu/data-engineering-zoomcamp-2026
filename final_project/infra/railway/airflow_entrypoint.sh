@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${DEMO_MODE:-false}" != "true" ]]; then
+  echo "Airflow demo service is dormant. Set DEMO_MODE=true and redeploy to start it."
+  exit 0
+fi
+
 role="${AIRFLOW_ROLE:-webserver}"
 
 case "${role}" in

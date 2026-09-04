@@ -4,5 +4,8 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir kafka-python==2.0.2
 COPY streaming/producer.py /app/producer.py
+COPY infra/railway/demo_entrypoint.sh /app/demo_entrypoint.sh
+RUN chmod +x /app/demo_entrypoint.sh
 
+ENTRYPOINT ["/app/demo_entrypoint.sh"]
 CMD ["python", "producer.py"]

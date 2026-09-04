@@ -1,0 +1,9 @@
+FROM confluentinc/cp-zookeeper:7.5.0
+
+USER root
+COPY infra/railway/demo_entrypoint.sh /demo_entrypoint.sh
+RUN chmod +x /demo_entrypoint.sh
+
+USER appuser
+ENTRYPOINT ["/demo_entrypoint.sh"]
+CMD ["/etc/confluent/docker/run"]
