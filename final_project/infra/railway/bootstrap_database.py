@@ -26,6 +26,9 @@ def main() -> None:
     pipeline_password = os.getenv("PIPELINE_DB_PASSWORD")
     reader_user = os.getenv("STREAMLIT_DB_USER", "streamlit_reader")
     reader_password = os.getenv("STREAMLIT_DB_PASSWORD")
+    airflow_user = os.getenv("AIRFLOW_DB_USER", "airflow_user")
+    airflow_password = os.getenv("AIRFLOW_DB_PASSWORD")
+    airflow_database = os.getenv("AIRFLOW_DB_NAME", "airflow")
 
     with psycopg2.connect(admin_url) as connection:
         connection.autocommit = True
@@ -127,6 +130,26 @@ def main() -> None:
                 cursor.execute(
                     sql.SQL("ALTER ROLE {} CONNECTION LIMIT 5").format(
                         sql.Identifier(reader_user)
+                    )
+                )
+
+            if airflow_password:
+                ensure_login_role(cursor, airflow_user, airflow_password)
+                cursor.execute(
+                    "SELECT 1 FROM pg_database WHERE datname = %s",
+                    (airflow_database,),
+                )
+                if not cursor.fetchone():
+                    cursor.execute(
+                        sql.SQL("CREATE DATABASE {} OWNER {}").format(
+                            sql.Identifier(airflow_database),
+                            sql.Identifier(airflow_user),
+                        )
+                    )
+                cursor.execute(
+                    sql.SQL("GRANT CONNECT ON DATABASE {} TO {}").format(
+                        sql.Identifier(airflow_database),
+                        sql.Identifier(airflow_user),
                     )
                 )
 

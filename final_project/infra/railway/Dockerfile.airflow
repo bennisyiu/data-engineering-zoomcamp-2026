@@ -1,0 +1,20 @@
+FROM apache/airflow:2.7.3
+
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gcc libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+USER airflow
+RUN pip install --no-cache-dir \
+    pandas sqlalchemy psycopg2-binary python-dotenv boto3 \
+    dbt-postgres==1.8.2
+
+COPY --chown=airflow:root airflow/dags /opt/airflow/dags
+COPY --chown=airflow:root scripts /opt/airflow/repo/scripts
+COPY --chown=airflow:root data /opt/airflow/repo/data
+COPY --chown=airflow:root dbt_project /opt/airflow/repo/dbt_project
+COPY --chown=airflow:root infra/railway/airflow_entrypoint.sh /opt/airflow/
+RUN chmod +x /opt/airflow/airflow_entrypoint.sh
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/opt/airflow/airflow_entrypoint.sh"]
