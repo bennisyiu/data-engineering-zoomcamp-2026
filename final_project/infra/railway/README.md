@@ -109,6 +109,23 @@ Verification:
 The stream is intentionally a landing-zone demonstration; current dbt marts do
 not consume it.
 
+## Deployment verification
+
+The production migration was exercised end to end on 2026-09-04:
+
+- Streamlit reported healthy after its Railway database and OpenRouter
+  variables were configured.
+- The scheduled pipeline uploaded all three source CSVs, loaded 6,583 policies,
+  9,646 invoices, and 791 claims, then passed all 29 dbt models/tests.
+- Airflow initialized its dedicated metadata database; both the metadatabase
+  and scheduler reported healthy through the webserver health endpoint.
+- ZooKeeper and Kafka started over Railway private networking, the producer
+  published policy events, and the PyFlink Kafka-to-JDBC job launched.
+- The backup job uploaded a logical PostgreSQL dump under `backups/` in the
+  Railway bucket.
+- All Airflow and streaming services were returned to `DEMO_MODE=false`, and
+  PostgreSQL was left without a public TCP proxy.
+
 ## Cost controls
 
 - Keep Streamlit serverless and do not attach an uptime monitor.
