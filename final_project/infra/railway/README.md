@@ -1,0 +1,117 @@
+# Railway deployment
+
+This directory contains the immutable images and entrypoints used to run the
+insurance analytics portfolio on Railway. The original AWS/EC2 Docker Compose
+deployment remains in `infra/docker-compose.yml`.
+
+## Cost-aware production services
+
+| Service | Source | Runtime |
+|---|---|---|
+| `Postgres` | Railway PostgreSQL 15 | Always on, private |
+| `streamlit` | `infra/Dockerfile.streamlit` | Public, serverless sleep enabled |
+| `elt-pipeline` | `infra/railway/Dockerfile.pipeline` | Weekly Railway cron |
+| `insurance-raw-data` | Railway Storage Bucket | Private S3-compatible storage |
+
+Railway should use `/final_project` as the repository root. Inter-service
+traffic uses private Railway networking. PostgreSQL does not need a public TCP
+proxy.
+
+### Pipeline variables
+
+- `ADMIN_DATABASE_URL` references `Postgres.DATABASE_URL`
+- `PIPELINE_DATABASE_URL` uses the generated `pipeline_writer` login
+- `PIPELINE_DB_USER` / `PIPELINE_DB_PASSWORD`
+- `STREAMLIT_DB_USER` / `STREAMLIT_DB_PASSWORD` (used to create the reader)
+- `S3_BUCKET_NAME` references bucket `BUCKET`
+- `S3_ENDPOINT_URL` references bucket `ENDPOINT`
+- `AWS_ACCESS_KEY_ID` references bucket `ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY` references bucket `SECRET_ACCESS_KEY`
+- `AWS_REGION` references bucket `REGION`
+- `S3_RAW_PREFIX=raw`
+- `SEED_BUCKET_ON_START=true`
+
+`run_pipeline.py` initializes schemas and roles, uploads the bundled source
+CSVs to the Railway bucket, atomically refreshes raw tables, runs `dbt build`,
+and exits. The production schedule is `0 3 * * 0` (Sunday 03:00 UTC).
+
+### Streamlit variables
+
+- `STREAMLIT_DATABASE_URL` uses the generated `streamlit_reader` login
+- `OPENROUTER_API_KEY`
+- `OPENROUTER_MODEL`
+- `OPENROUTER_SITE_URL`
+- `OPENROUTER_APP_NAME`
+
+The reader login has access only to `marts`, defaults to read-only
+transactions, has a 15-second statement timeout, and is limited to five
+connections.
+
+## On-demand Airflow demo
+
+Airflow remains fully runnable on Railway but is not kept online continuously.
+Create two services from the same GitHub repository and branch:
+
+| Service | Dockerfile | Start variable |
+|---|---|---|
+| `airflow-webserver` | `infra/railway/Dockerfile.airflow` | `AIRFLOW_ROLE=webserver` |
+| `airflow-scheduler` | `infra/railway/Dockerfile.airflow` | `AIRFLOW_ROLE=scheduler` |
+
+Both use `/final_project` as the root and share:
+
+- `AIRFLOW__DATABASE__SQL_ALCHEMY_CONN` using the generated `airflow_user`
+  login and the `airflow` logical database
+- Warehouse `POSTGRES_*` variables using `pipeline_writer`
+- Railway bucket variables listed above
+- A generated `AIRFLOW__WEBSERVER__SECRET_KEY`
+
+The webserver also receives generated `AIRFLOW_ADMIN_PASSWORD` and is the only
+Airflow service given a temporary public domain. The scheduler unpauses
+`insurance_elt_pipeline` when `AIRFLOW_UNPAUSE_DAG=true`.
+
+Delete the temporary deployments after a demonstration. The Airflow metadata
+database remains in the existing PostgreSQL service for the next demo.
+
+## On-demand Kafka and Flink demo
+
+Create these temporary Railway services:
+
+| Service | Source |
+|---|---|
+| `zookeeper` | `confluentinc/cp-zookeeper:7.5.0` |
+| `kafka` | `confluentinc/cp-kafka:7.5.0` |
+| `event-producer` | `infra/railway/Dockerfile.producer` |
+| `flink-streaming` | `infra/railway/Dockerfile.flink` |
+
+Use private networking only. Kafka listens on `29092` internally and advertises
+its Railway private domain. The producer and Flink job use
+`KAFKA_BOOTSTRAP_SERVERS=<kafka-private-domain>:29092` and
+`KAFKA_TOPIC=policy_events`. Flink uses the `pipeline_writer` PostgreSQL
+credentials and writes to `raw_streaming.stream_policy_events`.
+
+Verification:
+
+1. Start ZooKeeper, then Kafka.
+2. Start the producer and Flink services.
+3. Confirm new rows arrive in `raw_streaming.stream_policy_events`.
+4. Capture the demonstration evidence, then delete the four temporary
+   deployments to stop compute charges.
+
+The stream is intentionally a landing-zone demonstration; current dbt marts do
+not consume it.
+
+## Cost controls
+
+- Keep Streamlit serverless and do not attach an uptime monitor.
+- Keep the pipeline weekly or manual because the source dataset is static.
+- Apply per-service CPU and memory ceilings.
+- Configure a soft usage alert around USD 4. Railway's minimum compute hard
+  limit is USD 10, so the platform cannot enforce a USD 5 hard stop.
+- Do not leave Airflow, Kafka, ZooKeeper, Flink, or the producer running after
+  a demonstration.
+
+## Backup and recovery
+
+The warehouse is reproducible from the Railway bucket plus dbt. Also retain a
+logical `pg_dump` outside Railway before decommissioning AWS and periodically
+afterward. Test one restore before removing the EC2 volume and S3 bucket.
