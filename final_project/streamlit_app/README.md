@@ -2,9 +2,20 @@
 
 Optional demo for **DE Zoomcamp `final_project`**: natural-language questions → LLM-generated SQL → read-only execution against PostgreSQL **`marts`** (same tables built by dbt in this repo).
 
-**Reviewers:** use the public URL your instructor provides (e.g. `http://<Elastic-IP>:8501`). You do **not** need an OpenRouter API key; only the server operator configures that in `.env`.
+**Reviewers:** use
+**https://streamlit-production-43ac.up.railway.app**. The serverless service may
+take a few seconds to wake. You do **not** need an OpenRouter API key; only the
+operator configures it as a Railway variable.
 
-## Deploy with Docker Compose (recommended for EC2)
+## Current Railway deployment
+
+Railway builds the immutable image from
+[`infra/Dockerfile.streamlit`](../infra/Dockerfile.streamlit), injects
+`STREAMLIT_DATABASE_URL` for a `marts`-only reader, and supplies `PORT`.
+The public service uses serverless sleep to control portfolio hosting costs.
+See [`infra/railway/README.md`](../infra/railway/README.md).
+
+## Original AWS/EC2 and local Docker deployment
 
 The **`streamlit`** service in [`infra/docker-compose.yml`](../infra/docker-compose.yml) builds from [`infra/Dockerfile.streamlit`](../infra/Dockerfile.streamlit), listens on **`0.0.0.0:8501`**, and connects to the **`warehouse`** container on the Compose network (you do **not** set `POSTGRES_HOST=localhost` for this service — Compose sets `warehouse` for you).
 
@@ -58,6 +69,8 @@ Browser: **http://localhost:8501**
 | `OPENROUTER_MODEL` | Optional. Default in code: `qwen/qwen3.5-flash-02-23`. |
 | `OPENROUTER_SITE_URL` | Optional. HTTP-Referer for OpenRouter. |
 | `OPENROUTER_APP_NAME` | Optional. App title for OpenRouter. |
+| `STREAMLIT_DATABASE_URL` | Preferred Railway URL for the least-privilege reader. |
+| `DATABASE_URL` | General URL fallback when a dedicated reader URL is not set. |
 | `POSTGRES_HOST` | **Docker Streamlit service:** set automatically to `warehouse`. **Local `streamlit run`:** `localhost` if warehouse publishes 5432 on the host. |
 | `POSTGRES_PORT` | Default `5432`. |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Same as warehouse. |
@@ -68,6 +81,8 @@ Browser: **http://localhost:8501**
 
 - Only **SELECT** / **WITH … SELECT** runs; other statements are rejected.
 - Queries get **LIMIT 200** if the model omits a limit.
+- Railway uses a database-enforced read-only role restricted to `marts`, a
+  15-second statement timeout, and a five-connection limit.
 
 ## Example prompts
 

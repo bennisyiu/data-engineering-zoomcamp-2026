@@ -4,6 +4,26 @@
 
 ---
 
+## Current Hosting Status
+
+This project was originally designed and deployed on **AWS EC2 + S3**, demonstrating
+AWS infrastructure, IAM, networking, container operations, and data-lake integration.
+To keep the portfolio available long-term at lower cost, the live deployment was
+subsequently migrated completely to **Railway**:
+
+- **Live Streamlit Text-to-SQL:** https://streamlit-production-43ac.up.railway.app
+- **Live Tableau dashboard:** [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link)
+- **Current platform:** Railway PostgreSQL 15, Storage Bucket, serverless Streamlit,
+  and scheduled ELT/dbt jobs
+- **Demonstration mode:** Airflow and Kafka/PyFlink remain deployable on Railway
+  for interviews without incurring continuous compute charges
+
+The original AWS architecture, operational documentation, and design decisions are
+preserved below. The migration demonstrates a second cloud deployment pattern and
+an explicit cost-optimization decision; it does not replace the AWS engineering work.
+
+---
+
 ## Problem Statement
 
 An insurance company generates transactional data across three domains — **policies**, **invoices**, and **claims** — but has no unified analytical layer. Business questions such as _"How does premium revenue compare between new and returning customers?"_ or _"Which products have the highest loss ratio?"_ require manual joining across raw tables with inconsistent types and no quality checks.
@@ -16,20 +36,32 @@ This project solves that by building a **full ELT pipeline**: raw CSVs are extra
 
 ## Access for Reviewers
 
-Live URLs below assume **Docker Compose from this `final_project`** (or an equivalent clone with the same services) is running on the EC2 instance behind Elastic IP **`52.221.114.40`**, with the security group allowing inbound **8082**, **8501**, and **5432** as needed. If the IP changes, update this README and notify reviewers.
+The current public services are Railway Streamlit and Tableau Public. PostgreSQL
+remains private on Railway; the application uses a least-privilege, `marts`-only
+database role.
 
 | What                    | Where                                                                                                                                                                                           |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Code, SQL, dbt models   | This repo                                                                                                                                                                                       |
 | Setup and Tableau notes | [`notes/`](notes/) (setup_guide.md, tableau_summary.md)                                                                                                                                         |
-| Airflow UI              | `http://52.221.114.40:8082` — username **`admin`**, password **`admin`** (default from compose init; see [`infra/INFRA.md`](infra/INFRA.md))                                                     |
-| PostgreSQL warehouse    | Host **`52.221.114.40`**, port **`5432`**, database **`insurance_dwh`** — **`POSTGRES_USER`** / **`POSTGRES_PASSWORD`** match the values on the server’s root `.env` (share read-only access with reviewers by email; do not commit passwords) |
+| Current hosting         | Railway — see [`infra/railway/README.md`](infra/railway/README.md)                                                                                                                             |
+| Streamlit Text-to-SQL   | **https://streamlit-production-43ac.up.railway.app** — serverless; allow a few seconds for a cold start                                                                                       |
+| PostgreSQL warehouse    | Private Railway PostgreSQL 15, database **`insurance_dwh`**; not exposed publicly                                                                                                              |
+| Airflow UI              | Railway on-demand interview/demo service; original EC2 UI retired                                                                                                                              |
 | Tableau Public          | [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link) — no login required to view (4 dashboards as a Story)        |
-| Streamlit Text-to-SQL   | **`http://52.221.114.40:8501`** — no reviewer login; **`OPENROUTER_API_KEY`** is configured only on the server (see [`streamlit_app/README.md`](streamlit_app/README.md))                         |
 | Architecture diagrams   | [High-Level](docs/High-Level%20Architecture_drawio_image.png), [ELT Pipeline](<docs/ELT Pipeline (Airflow DAG)_drawio_image.png>), [Data Lineage](docs/Data%20Model%20Lineage_drawio_image.png) |
-| Docker & cloud          | [`infra/INFRA.md`](infra/INFRA.md). **EC2:** use ≥30 GB root volume (default 8 GB fills and breaks the pipeline).                                                                               |
+| Docker & cloud          | Original AWS/local deployment: [`infra/INFRA.md`](infra/INFRA.md); current Railway deployment: [`infra/railway/README.md`](infra/railway/README.md)                                          |
 
-**Reviewer checklist (what should work):** (1) Open Airflow URL and sign in with **`admin` / `admin`**. (2) Connect to Postgres with the **host, port, database, user, and password** you supplied by email (same as server `.env`). (3) Open the Tableau link. (4) Open Streamlit and run a plain-English question; results should load if the warehouse has **`marts`** built and OpenRouter is configured on the host.
+**Reviewer checklist:** (1) Open Tableau. (2) Open Streamlit, allow a few
+seconds for its serverless cold start, and run a plain-English question.
+(3) Review the preserved AWS architecture and the Railway migration below.
+
+### Historical AWS reviewer endpoints
+
+The original deployment used EC2 Elastic IP **`52.221.114.40`** with Airflow on
+**8082**, Streamlit on **8501**, and PostgreSQL on **5432** behind security-group
+rules. These endpoints are intentionally retired after the Railway cutover; their
+configuration remains documented in [`infra/INFRA.md`](infra/INFRA.md).
 
 ---
 
@@ -57,6 +89,24 @@ Live URLs below assume **Docker Compose from this `final_project`** (or an equiv
 
 > Source file: [`docs/architecture.drawio`](docs/architecture.drawio) (editable in [draw.io](https://app.diagrams.net/); exported PNGs below).
 
+### Current Railway architecture
+
+```mermaid
+flowchart LR
+    Reviewer[Reviewer] --> Streamlit["Streamlit (public and serverless)"]
+    Streamlit --> Postgres["Railway PostgreSQL 15 (private)"]
+    Cron["Railway ELT cron"] --> Bucket["Railway Storage Bucket"]
+    Cron --> Postgres
+    Cron --> Dbt["dbt build and tests"]
+    Dbt --> Postgres
+    Reviewer --> Tableau["Tableau Public"]
+    Airflow["Airflow demo mode"] --> Postgres
+    Kafka["Kafka and ZooKeeper demo mode"] --> Flink["PyFlink demo mode"]
+    Flink --> Postgres
+```
+
+### Original AWS architecture
+
 ![High-Level Architecture](docs/High-Level%20Architecture_drawio_image.png)
 
 ### Why ELT (not ETL)?
@@ -72,12 +122,12 @@ Live URLs below assume **Docker Compose from this `final_project`** (or an equiv
 | Language         | Python 3.10+                           | Scripting, EL tasks, Airflow DAGs                                |
 | SQL              | PostgreSQL 15                          | Warehouse queries, dbt backend                                   |
 | Transformations  | dbt Core + dbt-postgres                | Medallion architecture (raw → staging → intermediate → marts)    |
-| Orchestration    | Apache Airflow 2.x + astronomer-cosmos | Centralized scheduling, workflow automation, dbt task visibility |
+| Orchestration    | Apache Airflow 2.x + BashOperator       | Centralized scheduling and dbt workflow automation               |
 | Stream processing | Apache Flink (PyFlink) + Kafka        | Event stream → `raw_streaming.stream_policy_events` ([`streaming/`](streaming/)) |
 | Dashboard        | Tableau Public                         | Interactive analytics dashboard (public URL)                     |
 | Ad hoc analytics | Streamlit + OpenRouter                 | Optional Text-to-SQL over `marts` ([`streamlit_app/`](streamlit_app/)) |
 | Containerization | Docker + Docker Compose                | Reproducible deployment (Airflow + PostgreSQL + dbt)             |
-| Cloud            | AWS EC2 + S3                           | Hosting (EC2), Data Lake (S3)                                    |
+| Cloud            | Railway; originally AWS EC2 + S3       | Current hosting plus preserved original cloud architecture       |
 | Version Control  | Git + GitHub                           | Source control                                                   |
 | Secrets          | `.env` (Docker env vars)               | Local config; Secrets Manager recommended for production         |
 
@@ -177,7 +227,8 @@ A single Airflow DAG (`insurance_elt_pipeline`) runs the full ELT flow end-to-en
 2. **Transform** — `dbt run` builds the staging → intermediate → marts layers.
 3. **Test** — `dbt test` validates data quality (not-null, unique, referential integrity).
 
-**astronomer-cosmos** renders each dbt model as an individual Airflow task with correct dependencies, giving full visibility into the DAG.
+The DAG uses explicit Airflow `BashOperator` tasks for ingestion, `dbt run`, and
+`dbt test`, preserving a simple and inspectable three-stage dependency chain.
 
 ![ELT Pipeline (Airflow DAG)](<docs/ELT%20Pipeline%20(Airflow%20DAG)_drawio_image.png>)
 
@@ -258,14 +309,27 @@ This project includes an optional **Streamlit** web app that uses a **large lang
 
 ## Cloud Infrastructure
 
-The entire stack is deployed on **AWS**:
+### Current Railway hosting
+
+The cost-optimized live deployment uses one private PostgreSQL 15 service, a
+private S3-compatible Railway Storage Bucket, serverless Streamlit, a weekly
+terminating ELT/dbt cron service, and a monthly logical-backup job. Airflow and
+Kafka/PyFlink use immutable Railway-ready images but run only for demonstrations.
+See [`infra/railway/README.md`](infra/railway/README.md).
+
+### Original AWS hosting
+
+The original full-time deployment ran on **AWS**:
 
 | Service            | Role                                                                         |
 | ------------------ | ---------------------------------------------------------------------------- |
 | **S3**             | Data lake — raw CSVs stored under `raw/` prefix                              |
 | **EC2** (t3.small or larger) | Hosts Airflow, PostgreSQL (warehouse + metadata), dbt, Streamlit, and optional Kafka + PyFlink via Docker Compose (see [`infra/INFRA.md`](infra/INFRA.md) for sizing) |
 
-The same `docker-compose.yml` used locally runs on EC2 with no changes. Security, reliability, and cost (~$0–10/month on free tier) are documented in [`infra/INFRA.md`](infra/INFRA.md). IaC-style deployment scripts are in `infra/scripts/`.
+The same `docker-compose.yml` used locally ran on EC2. Security, reliability,
+storage sizing, IAM, and networking are documented in [`infra/INFRA.md`](infra/INFRA.md).
+The move to Railway eliminates the continuing EC2, EBS, Elastic IP, and S3 costs
+while preserving the AWS implementation as a reproducible architecture.
 
 ---
 
@@ -276,6 +340,10 @@ Local setup requires Python 3.10+, PostgreSQL 15, Docker Compose, dbt-core + dbt
 **Local run (no Docker):** Clone the repo, run `pip install -r requirements.txt`, copy `infra/.env.example` to `.env` and set Postgres (and AWS if needed). Then run `python scripts/extract_load.py` and from `dbt_project`: `dbt deps`, `dbt run`, `dbt test`.
 
 **Full pipeline (Docker):** From the repo root, `cd infra` and `docker compose --env-file ../.env build` (first time builds Airflow, Streamlit, **event-producer**, and **flink-streaming**), then `docker compose --env-file ../.env up -d` (so root `.env` is loaded). On first run the init container creates the Airflow DB and admin user; after ~30–60 seconds the UI is available at http://localhost:8082 (login `admin` / `admin`). The `insurance_elt_pipeline` DAG runs the full ELT when triggered. **Streaming:** Kafka starts on **9092**; PyFlink writes to `raw_streaming.stream_policy_events`. If your **warehouse** data volume was created before that schema existed, run `infra/scripts/add_raw_streaming.sql` once (see [`streaming/README.md`](streaming/README.md)).
+
+**Railway:** The current hosted deployment, required variables, service mapping,
+cron schedules, backup process, and on-demand Airflow/streaming runbook are in
+[`infra/railway/README.md`](infra/railway/README.md).
 
 **S3 (pipeline reads CSVs from S3):** Create a bucket, set `S3_BUCKET_NAME` in `.env`, then run `python scripts/upload_to_s3.py` from the repo root to upload `data/*.csv` under `raw/`. See [infra/S3_SETUP.md](infra/S3_SETUP.md).
 

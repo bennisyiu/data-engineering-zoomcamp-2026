@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -52,6 +53,9 @@ def main() -> None:
         run(sys.executable, "scripts/upload_to_s3.py", env=env)
 
     run(sys.executable, "scripts/extract_load.py", env=env)
+    profiles_path = DBT_PROJECT / "profiles.yml"
+    if not profiles_path.exists():
+        shutil.copy2(DBT_PROJECT / "profiles.yml.example", profiles_path)
     if (DBT_PROJECT / "packages.yml").exists():
         run("dbt", "deps", cwd=DBT_PROJECT, env=env)
     run(

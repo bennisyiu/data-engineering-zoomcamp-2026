@@ -1,5 +1,11 @@
 # Infrastructure: Airflow + Docker (Local) & Cloud
 
+> **Deployment history:** This document preserves the original AWS EC2 + S3
+> deployment and the full local Docker Compose setup. The current cost-optimized
+> hosted environment is Railway; see [`railway/README.md`](railway/README.md).
+> Historical EC2 addresses below are retained as portfolio evidence and are not
+> expected to remain reachable after the completed cutover.
+
 This folder runs the full ELT: **extract_load** (S3 or local `data/` → Postgres `raw`), then **dbt run** and **dbt test**, orchestrated by Airflow, plus an optional **Streamlit** service (Text-to-SQL on port **8501**). The same Compose file also starts **Kafka + Zookeeper**, a demo **event-producer**, and **flink-streaming** (PyFlink job → `raw_streaming.stream_policy_events`); see [`../streaming/README.md`](../streaming/README.md).
 
 ## Requirements
