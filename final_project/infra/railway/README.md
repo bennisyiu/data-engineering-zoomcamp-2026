@@ -128,6 +128,10 @@ The production migration was exercised end to end on 2026-09-04:
 
 ## Cost controls
 
+AWS Cost Explorer reported about US$26.24 for August 2026 across the service
+categories supporting the original deployment. This Railway layout is designed
+to stay near the Hobby plan's US$5 monthly usage allowance:
+
 - Keep Streamlit serverless and do not attach an uptime monitor.
 - Keep the pipeline weekly or manual because the source dataset is static.
 - Apply per-service CPU and memory ceilings.

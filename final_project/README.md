@@ -17,6 +17,9 @@ subsequently migrated completely to **Railway**:
   and scheduled ELT/dbt jobs
 - **Demonstration mode:** Airflow and Kafka/PyFlink remain deployable on Railway
   for interviews without incurring continuous compute charges
+- **Cost rationale:** AWS Cost Explorer showed approximately **US$26.24** for
+  August 2026 across EC2 compute, EC2-related storage/networking, VPC, and S3;
+  the Railway design targets the Hobby plan's **US$5 monthly usage allowance**
 
 The original AWS architecture, operational documentation, and design decisions are
 preserved below. The migration demonstrates a second cloud deployment pattern and
