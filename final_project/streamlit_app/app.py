@@ -62,6 +62,15 @@ All tables live in schema `marts`. Use qualified names: marts.<table>.
 -- claim_count_ly, loss_ratio_ly, avg_premium_per_policy_ly, avg_claim_amount_ly
 """
 
+MART_TABLES = (
+    "mart_new_vs_returning_premium",
+    "mart_policy_denormalized",
+    "mart_dashboard_daily",
+    "mart_dashboard_monthly",
+    "mart_dashboard_rollups",
+    "mart_dashboard_by_product",
+)
+
 
 def get_engine():
     database_url = os.getenv("STREAMLIT_DATABASE_URL") or os.getenv("DATABASE_URL")
@@ -200,6 +209,24 @@ def main():
         with st.expander("Marts schema (for reviewers)"):
             st.markdown(f"```\n{MARTS_SCHEMA_DOC}\n```")
 
+    with st.expander("Browse curated data marts", expanded=False):
+        st.caption(
+            "Preview up to 100 rows through the same database-enforced, "
+            "read-only Railway role used by Text-to-SQL."
+        )
+        selected_mart = st.selectbox("Data mart", MART_TABLES)
+        if st.button("Load mart preview"):
+            try:
+                preview = run_readonly_query(
+                    f"SELECT * FROM marts.{selected_mart} LIMIT 100"
+                )
+            except Exception as exc:
+                st.error(f"Database preview error: {exc}")
+            else:
+                st.dataframe(preview, use_container_width=True)
+                st.caption(f"{len(preview)} row(s), limited to 100")
+
+    st.subheader("Ask the warehouse")
     default_q = (
         "What is the average total net premium for returning vs new customers "
         "in mart_new_vs_returning_premium?"

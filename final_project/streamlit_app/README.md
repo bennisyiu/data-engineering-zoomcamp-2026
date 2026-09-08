@@ -13,6 +13,8 @@ Railway builds the immutable image from
 [`infra/Dockerfile.streamlit`](../infra/Dockerfile.streamlit), injects
 `STREAMLIT_DATABASE_URL` for a `marts`-only reader, and supplies `PORT`.
 The public service uses serverless sleep to control portfolio hosting costs.
+Reviewers can use **Browse curated data marts** to inspect up to 100 rows from
+each dbt mart without receiving database credentials or raw-table access.
 See [`infra/railway/README.md`](../infra/railway/README.md).
 
 ## Original AWS/EC2 and local Docker deployment

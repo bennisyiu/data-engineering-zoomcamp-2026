@@ -21,10 +21,12 @@ In the Railway project canvas, confirm:
 3. Submit: `How many policies are there?`
 4. Confirm the app displays generated read-only SQL and a result.
    The current mart result is 696 policies: 78 new and 618 returning.
-5. Also try:
+5. Expand **Browse curated data marts**, select a mart, and confirm its
+   read-only 100-row preview loads.
+6. Also try:
    - `Compare new and returning customers by policy count and average net premium.`
    - `Which products have the highest loss ratio in the latest month?`
-6. Confirm no database or OpenRouter error appears.
+7. Confirm no database or OpenRouter error appears.
 
 ## 3. Test Tableau
 
