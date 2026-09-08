@@ -30,11 +30,11 @@ _MODEL_TYPO = "qwen/qwen3.5-flash-02-23s"
 MARTS_SCHEMA_DOC = """
 All tables live in schema `marts`. Use qualified names: marts.<table>.
 
--- mart_new_vs_returning_premium: new vs returning policies (excl. outlier user)
+-- mart_new_vs_returning_premium: policies with paid invoices, new vs returning (excl. outlier user)
 -- policy_type (text): 'new' | 'returning'
 -- policy_count (int), avg_net_premium (numeric), total_net_premium (numeric)
 
--- mart_policy_denormalized: one row per policy
+-- mart_policy_denormalized: one row per policy, including those WITHOUT paid invoices
 -- policy_number, user_id, product, issue_date, effective_date, insured_gender,
 -- insured_date_of_birth, is_outlier_user (bool),
 -- invoice_count, total_pre_levy_amount, total_amount_paid,
@@ -154,6 +154,10 @@ def generate_sql(question: str, client: OpenAI, model: str) -> str:
         "You are a careful PostgreSQL analyst. Generate a single read-only query. "
         "Rules:\n"
         "- Use only the marts schema described below.\n"
+        "- For an unqualified policy count, use SUM(policy_count) from "
+        "marts.mart_new_vs_returning_premium and label it policies_with_paid_invoices. "
+        "This portfolio KPI excludes the outlier user and policies without paid invoices. "
+        "If explicitly asked for all policies, count mart_policy_denormalized instead.\n"
         "- Return exactly one SQL statement, no explanation outside a markdown sql fence.\n"
         "- Prefer explicit column lists or aggregates; include LIMIT 200 if not already present.\n"
         "- Use ISO dates where filtering dates.\n\n"
@@ -227,6 +231,8 @@ def main():
                 st.caption(f"{len(preview)} row(s), limited to 100")
 
     st.subheader("Ask the warehouse")
+    st.caption("Default policy KPI: policies with paid invoices, excluding the outlier user. "
+               "Ask for all policies to include those without paid invoices.")
     default_q = (
         "What is the average total net premium for returning vs new customers "
         "in mart_new_vs_returning_premium?"

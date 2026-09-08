@@ -2,7 +2,8 @@
 # Run from infra/: docker compose --env-file ../.env up -d
 # Airflow UI: http://<host>:8082 (admin/admin). Streamlit: http://<host>:8501
 # EC2: same Elastic IP for :8082 and :8501 — open both in the security group.
-# EC2 / all-Docker: POSTGRES_HOST=warehouse in .env for Airflow. Streamlit service forces warehouse internally.
+# Airflow services set POSTGRES_HOST=warehouse below so tasks reach the warehouse container even if
+# final_project/.env uses POSTGRES_HOST=localhost (for pgAdmin / dbt on the host via published :5432).
 
 x-common-env: &common-env
   AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -53,6 +54,9 @@ services:
     build: .
     environment:
       <<: *common-env
+      # Do not use localhost here — tasks run inside this network namespace.
+      POSTGRES_HOST: warehouse
+      POSTGRES_PORT: "5432"
       _PIP_ADDITIONAL_REQUIREMENTS: ""
     command: >
       bash -c "
@@ -72,6 +76,8 @@ services:
     build: .
     environment:
       <<: *common-env
+      POSTGRES_HOST: warehouse
+      POSTGRES_PORT: "5432"
       _PIP_ADDITIONAL_REQUIREMENTS: ""
     command: webserver
     ports:
@@ -92,6 +98,8 @@ services:
     build: .
     environment:
       <<: *common-env
+      POSTGRES_HOST: warehouse
+      POSTGRES_PORT: "5432"
     command: scheduler
     volumes:
       - ../airflow/dags:/opt/airflow/dags
@@ -166,8 +174,20 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-    entrypoint: ["/bin/bash", "-c"]
-    command: "kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic policy_events --replication-factor 1 --partitions 1"
+    # Do not use `bash -c` with a string command: Compose splits the string into argv,
+    # so bash only receives `kafka-topics` as the -c script and the topic is never created.
+    command:
+      - kafka-topics
+      - --bootstrap-server
+      - kafka:29092
+      - --create
+      - --if-not-exists
+      - --topic
+      - policy_events
+      - --replication-factor
+      - "1"
+      - --partitions
+      - "1"
     restart: "no"
 
   event-producer:

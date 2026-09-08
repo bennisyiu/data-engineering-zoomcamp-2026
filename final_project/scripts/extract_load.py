@@ -19,12 +19,16 @@ from sqlalchemy import create_engine, inspect, text
 REPO_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(REPO_ROOT / ".env")
 
-DB_HOST = os.getenv("POSTGRES_HOST")
-DB_PORT = os.getenv("POSTGRES_PORT")
-DB_USER = os.getenv("POSTGRES_USER")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-DB_NAME = os.getenv("POSTGRES_DB")
-DATABASE_URL = os.getenv("DATABASE_URL")
+def _configure_postgres_env() -> None:
+    """Preserve injected hosts; support the original Compose localhost fallback."""
+    load_dotenv(REPO_ROOT / ".env", override=False)
+    in_container = bool(os.environ.get("AIRFLOW_HOME")) or os.path.exists("/.dockerenv")
+    if in_container and not os.getenv("RAILWAY_ENVIRONMENT_ID"):
+        host = (os.getenv("POSTGRES_HOST") or "").strip().lower()
+        if host in ("", "localhost", "127.0.0.1"):
+            os.environ["POSTGRES_HOST"] = "warehouse"
+            os.environ.setdefault("POSTGRES_PORT", "5432")
+
 
 # AWS names remain supported; Railway injects the shorter bucket variable names.
 S3_BUCKET = os.getenv("S3_BUCKET_NAME") or os.getenv("BUCKET")
@@ -43,6 +47,13 @@ CSV_TO_TABLE = {
 
 
 def get_engine():
+    _configure_postgres_env()
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME = (
+        os.getenv(key) for key in (
+            "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"
+        )
+    )
     if DATABASE_URL:
         url = DATABASE_URL.replace("postgres://", "postgresql://", 1)
         return create_engine(url, pool_pre_ping=True, connect_args={"connect_timeout": 10})
@@ -144,7 +155,8 @@ def load_csv_to_raw(engine, df: pd.DataFrame, table_name: str):
 
 def main():
     engine = get_engine()
-    print(f"Connected to {DB_NAME} at {DB_HOST}:{DB_PORT}")
+    _h, _p, _, _, _db = _db_settings()
+    print(f"Connected to {_db} at {_h}:{_p}")
     print("Loading CSVs into raw schema (full refresh)...")
 
     if S3_BUCKET:

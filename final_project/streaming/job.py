@@ -57,6 +57,8 @@ def main() -> None:
     env.set_parallelism(1)
 
     jar_dir = "/opt/flink/lib"
+    # kafka-clients lives in /opt/flink/lib only; do not add_jars it — duplicate loading
+    # causes ByteArrayDeserializer "not an instance of Deserializer" (split classloaders).
     env.add_jars(
         f"file://{jar_dir}/flink-connector-kafka-3.0.2-1.18.jar",
         f"file://{jar_dir}/flink-connector-jdbc-3.1.2-1.18.jar",
