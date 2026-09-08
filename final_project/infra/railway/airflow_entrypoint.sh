@@ -28,7 +28,16 @@ case "${role}" in
   scheduler)
     airflow db migrate
     if [[ "${AIRFLOW_UNPAUSE_DAG:-true}" == "true" ]]; then
-      airflow dags unpause insurance_elt_pipeline || true
+      (
+        for _ in {1..30}; do
+          if airflow dags list 2>/dev/null | grep -q "insurance_elt_pipeline"; then
+            airflow dags unpause insurance_elt_pipeline || true
+            exit 0
+          fi
+          sleep 2
+        done
+        echo "DAG was not available to unpause during the startup window." >&2
+      ) &
     fi
     exec airflow scheduler
     ;;
