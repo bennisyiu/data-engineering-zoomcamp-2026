@@ -155,8 +155,7 @@ def load_csv_to_raw(engine, df: pd.DataFrame, table_name: str):
 
 def main():
     engine = get_engine()
-    _h, _p, _, _, _db = _db_settings()
-    print(f"Connected to {_db} at {_h}:{_p}")
+    print(f"Loading database {engine.url.database} at {engine.url.host}:{engine.url.port}")
     print("Loading CSVs into raw schema (full refresh)...")
 
     if S3_BUCKET:
