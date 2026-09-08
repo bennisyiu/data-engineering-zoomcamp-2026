@@ -46,6 +46,12 @@ def main() -> None:
             ],
             check=True,
         )
+        subprocess.run(
+            ["pg_restore", "--list", str(dump_path)],
+            check=True,
+            stdout=subprocess.DEVNULL,
+        )
+        print("Validated logical backup with pg_restore --list")
         s3 = get_s3_client()
         s3.upload_file(str(dump_path), bucket, key)
         print(f"Uploaded logical backup to s3://{bucket}/{key}")
