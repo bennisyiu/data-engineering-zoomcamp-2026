@@ -30,7 +30,7 @@ In the Railway project canvas, confirm:
 
 ## 3. Test Tableau
 
-1. Open the [Tableau Public story](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link).
+1. Open the [Tableau Public story](https://public.tableau.com/views/BennisYiu_InsurancePerformanceBIDashboard/InsuranceBIDashboard?:language=en-US&:display_count=n&:origin=viz_share_link).
 2. Open each of the four dashboards.
 3. Exercise at least one filter and confirm the charts update.
 

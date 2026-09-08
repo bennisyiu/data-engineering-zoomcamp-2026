@@ -12,7 +12,7 @@ To keep the portfolio available long-term at lower cost, the live deployment was
 subsequently migrated completely to **Railway**:
 
 - **Live Streamlit Text-to-SQL:** https://streamlit-production-43ac.up.railway.app
-- **Live Tableau dashboard:** [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link)
+- **Live Tableau dashboard:** [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/views/BennisYiu_InsurancePerformanceBIDashboard/InsuranceBIDashboard?:language=en-US&:display_count=n&:origin=viz_share_link)
 - **Current platform:** Railway PostgreSQL 15, Storage Bucket, serverless Streamlit,
   and scheduled ELT/dbt jobs
 - **Demonstration mode:** Airflow and Kafka/PyFlink remain deployable on Railway
@@ -51,7 +51,7 @@ database role.
 | Streamlit Text-to-SQL   | **https://streamlit-production-43ac.up.railway.app** — serverless; allow a few seconds for a cold start                                                                                       |
 | PostgreSQL warehouse    | Private Railway PostgreSQL 15, database **`insurance_dwh`**; not exposed publicly                                                                                                              |
 | Airflow UI              | [Railway on-demand demo](https://airflow-webserver-production-be4b.up.railway.app) — available only after demo mode is enabled; original EC2 UI retired                                         |
-| Tableau Public          | [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link) — no login required to view (4 dashboards as a Story)        |
+| Tableau Public          | [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/views/BennisYiu_InsurancePerformanceBIDashboard/InsuranceBIDashboard?:language=en-US&:display_count=n&:origin=viz_share_link) — no login required to view (4 dashboards as a Story)        |
 | Architecture diagrams   | [High-Level](docs/High-Level%20Architecture_drawio_image.png), [ELT Pipeline](<docs/ELT Pipeline (Airflow DAG)_drawio_image.png>), [Data Lineage](docs/Data%20Model%20Lineage_drawio_image.png) |
 | Docker & cloud          | Original AWS/local deployment: [`infra/INFRA.md`](infra/INFRA.md); current Railway deployment: [`infra/railway/README.md`](infra/railway/README.md)                                          |
 
@@ -278,7 +278,7 @@ dbt tests enforce not-null, uniqueness, accepted values, and referential integri
 
 ## Dashboard
 
-**[Live Dashboard →](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link)**
+**[Live Dashboard →](https://public.tableau.com/views/BennisYiu_InsurancePerformanceBIDashboard/InsuranceBIDashboard?:language=en-US&:display_count=n&:origin=viz_share_link)**
 
 A Tableau Story with **4 interactive dashboards**:
 

@@ -2,7 +2,7 @@
 
 ## Tableau Public
 
-**Live Dashboard:** [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/shared/65BQGNBFS?:display_count=n&:origin=viz_share_link)
+**Live Dashboard:** [Insurance Policy, Claims & Invoice Analytics](https://public.tableau.com/views/BennisYiu_InsurancePerformanceBIDashboard/InsuranceBIDashboard?:language=en-US&:display_count=n&:origin=viz_share_link)
 
 The workbook contains **4 dashboards** presented as a Tableau Story:
 
