@@ -28,6 +28,15 @@ In the Railway project canvas, confirm:
    - `Which products have the highest loss ratio in the latest month?`
 7. Confirm no database or OpenRouter error appears.
 
+## 2a. Browse PostgreSQL safely
+
+1. As the owner, open the Railway project and select **Postgres → Data** to
+   browse schemas, tables, and rows in Railway's built-in Table View.
+2. As a reviewer, use **Browse curated data marts** in the public Streamlit app.
+3. Do not enable a public PostgreSQL TCP proxy or publish database credentials.
+   A browser cannot speak the PostgreSQL protocol directly, and public database
+   access is unnecessary for the portfolio.
+
 ## 3. Test Tableau
 
 1. Open the [Tableau Public story](https://public.tableau.com/views/BennisYiu_InsurancePerformanceBIDashboard/InsuranceBIDashboard?:language=en-US&:display_count=n&:origin=viz_share_link).
