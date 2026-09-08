@@ -71,8 +71,10 @@ Both use `/final_project` as the root and share:
 - Railway bucket variables listed above
 - A generated `AIRFLOW__WEBSERVER__SECRET_KEY`
 
-The webserver also receives generated `AIRFLOW_ADMIN_PASSWORD` and is the only
-Airflow service given a public domain:
+The webserver also receives generated `AIRFLOW_ADMIN_PASSWORD` and
+`AIRFLOW_VIEWER_PASSWORD` variables. `AIRFLOW_VIEWER_USER` defaults to
+`reviewer`; share this read-only account only for a scheduled review, never the
+Admin account. The webserver is the only Airflow service given a public domain:
 https://airflow-webserver-production-be4b.up.railway.app. It responds only
 while demo mode is enabled. The scheduler unpauses `insurance_elt_pipeline`
 when `AIRFLOW_UNPAUSE_DAG=true`.

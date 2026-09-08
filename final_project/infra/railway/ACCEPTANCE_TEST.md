@@ -72,12 +72,14 @@ In the Railway project canvas, confirm:
 3. Open https://airflow-webserver-production-be4b.up.railway.app.
 4. Sign in as `admin` using the private `AIRFLOW_ADMIN_PASSWORD` shown only in
    the webserver's Railway Variables tab.
-5. Confirm the `insurance_elt_pipeline` DAG is visible.
-6. Open `/health` on the same domain and confirm the metadatabase and scheduler
+5. In a private browser window, sign in as `reviewer` using the private
+   `AIRFLOW_VIEWER_PASSWORD` and confirm the account has read-only Viewer access.
+6. Confirm the `insurance_elt_pipeline` DAG is visible.
+7. Open `/health` on the same domain and confirm the metadatabase and scheduler
    are healthy.
-7. Optionally trigger the DAG and confirm its ingestion, dbt run, and dbt test
+8. Optionally trigger the DAG as Admin and confirm its ingestion, dbt run, and dbt test
    tasks finish.
-8. Set `DEMO_MODE=false` on both services and deploy again. Confirm both show
+9. Set `DEMO_MODE=false` on both services and deploy again. Confirm both show
    **Completed**.
 
 ## 7. Test Kafka and PyFlink on demand

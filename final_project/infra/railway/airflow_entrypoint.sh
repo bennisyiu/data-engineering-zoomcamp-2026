@@ -23,6 +23,18 @@ case "${role}" in
           --username "${AIRFLOW_ADMIN_USER:-admin}" \
           --password "${AIRFLOW_ADMIN_PASSWORD}"
     fi
+    if [[ -n "${AIRFLOW_VIEWER_PASSWORD:-}" ]]; then
+      airflow users create \
+        --role Viewer \
+        --username "${AIRFLOW_VIEWER_USER:-reviewer}" \
+        --email "${AIRFLOW_VIEWER_EMAIL:-reviewer@example.com}" \
+        --firstname Portfolio \
+        --lastname Reviewer \
+        --password "${AIRFLOW_VIEWER_PASSWORD}" \
+        || airflow users reset-password \
+          --username "${AIRFLOW_VIEWER_USER:-reviewer}" \
+          --password "${AIRFLOW_VIEWER_PASSWORD}"
+    fi
     exec airflow webserver --port "${PORT:-8080}"
     ;;
   scheduler)
