@@ -1,7 +1,7 @@
 FROM apache/airflow:2.7.3
 
 USER root
-RUN apt-get update \
+RUN apt-get -o Acquire::Check-Valid-Until=false update \
     && apt-get install -y --no-install-recommends gcc libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
