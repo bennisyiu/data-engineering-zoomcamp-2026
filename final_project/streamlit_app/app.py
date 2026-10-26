@@ -72,6 +72,14 @@ MART_TABLES = (
 )
 
 
+def postgres_psycopg2_url(url: str) -> str:
+    """SQLAlchemy 2.1+ maps postgresql:// to psycopg3; this image ships psycopg2."""
+    url = url.replace("postgres://", "postgresql://", 1)
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg2://" + url[len("postgresql://") :]
+    return url
+
+
 def get_engine():
     database_url = os.getenv("STREAMLIT_DATABASE_URL") or os.getenv("DATABASE_URL")
     connect_args = {
@@ -79,8 +87,11 @@ def get_engine():
         "options": "-c default_transaction_read_only=on -c statement_timeout=15000",
     }
     if database_url:
-        url = database_url.replace("postgres://", "postgresql://", 1)
-        return create_engine(url, pool_pre_ping=True, connect_args=connect_args)
+        return create_engine(
+            postgres_psycopg2_url(database_url),
+            pool_pre_ping=True,
+            connect_args=connect_args,
+        )
 
     host = os.getenv("POSTGRES_HOST", "localhost")
     port = os.getenv("POSTGRES_PORT", "5432")
@@ -91,7 +102,7 @@ def get_engine():
         raise ValueError("Set POSTGRES_USER and POSTGRES_PASSWORD in final_project/.env")
     u, p = quote_plus(user), quote_plus(password)
     return create_engine(
-        f"postgresql://{u}:{p}@{host}:{port}/{db}",
+        postgres_psycopg2_url(f"postgresql://{u}:{p}@{host}:{port}/{db}"),
         pool_pre_ping=True,
         connect_args=connect_args,
     )
